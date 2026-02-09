@@ -4,6 +4,8 @@
 
 ClawForge combines static analysis with Claude AI to detect vulnerabilities in Solidity smart contracts and mint on-chain proof-of-audit NFTs (ERC-721) on BNB Chain.
 
+![ClawForge Architecture](architecture.png)
+
 ---
 
 ## How It Works
