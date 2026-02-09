@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Image from "next/image";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -33,7 +34,8 @@ export default function RootLayout({
         <Providers>
           <header className="border-b border-gray-800">
             <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-              <a href="/" className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <a href="/" className="flex items-center gap-3 text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                <Image src="/clawforge.png" alt="ClawForge" width={36} height={36} className="drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                 ClawForge
               </a>
               <div className="flex items-center gap-6 text-sm text-gray-400">

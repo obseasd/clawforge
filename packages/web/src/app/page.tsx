@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
@@ -55,6 +56,16 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <section className="text-center space-y-6 pt-12">
+        <div className="flex justify-center">
+          <Image
+            src="/clawforge.png"
+            alt="ClawForge Logo"
+            width={160}
+            height={160}
+            priority
+            className="drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+          />
+        </div>
         <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
           ClawForge
         </h1>
@@ -100,6 +111,35 @@ export default function Home() {
             <p className="text-sm text-gray-500">or click to browse</p>
           </div>
         </div>
+      )}
+
+      {!isAuditing && (
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-300 text-center">Try an Example Contract</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {[
+              { name: "ReentrancyVault", desc: "Reentrancy + no ACL", file: "ReentrancyVault.sol" },
+              { name: "UnsafeOracle", desc: "Oracle + tx.origin", file: "UnsafeOracle.sol" },
+              { name: "WeakToken", desc: "Overflow + selfdestruct", file: "WeakToken.sol" },
+              { name: "BrokenStaking", desc: "Staking reentrancy", file: "BrokenStaking.sol" },
+              { name: "ProxyWallet", desc: "Proxy + delegatecall", file: "ProxyWallet.sol" },
+            ].map((ex) => (
+              <button
+                key={ex.file}
+                onClick={async () => {
+                  const res = await fetch(`/examples/${ex.file}`);
+                  const text = await res.text();
+                  const file = new File([text], ex.file, { type: "text/plain" });
+                  onDrop([file]);
+                }}
+                className="bg-gray-900/50 border border-gray-700 hover:border-yellow-500/50 rounded-lg p-3 text-left transition-all hover:bg-gray-800/50 group"
+              >
+                <p className="text-sm font-mono text-yellow-400 group-hover:text-yellow-300">{ex.name}</p>
+                <p className="text-xs text-gray-500 mt-1">{ex.desc}</p>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
