@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BSCSCAN_URLS: Record<string, string> = {
-  mainnet: "https://api.bscscan.com/api",
-  testnet: "https://api-testnet.bscscan.com/api",
+// Etherscan V2 unified API with chainId parameter
+const CHAIN_IDS: Record<string, number> = {
+  mainnet: 56,
+  testnet: 97,
 };
+const ETHERSCAN_V2 = "https://api.etherscan.io/v2/api";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,8 +20,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "BSCScan API key not configured" }, { status: 500 });
     }
 
-    const baseUrl = BSCSCAN_URLS[network] || BSCSCAN_URLS.mainnet;
-    const url = `${baseUrl}?module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
+    const chainId = CHAIN_IDS[network] || CHAIN_IDS.mainnet;
+    const url = `${ETHERSCAN_V2}?chainid=${chainId}&module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
 
     const res = await fetch(url);
     const data = await res.json();
