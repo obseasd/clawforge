@@ -23,7 +23,12 @@ interface Summary {
 }
 
 const COLORS: Record<string, string> = {
-  critical: "#dc2626", high: "#ea580c", medium: "#eab308", low: "#3b82f6", info: "#6b7280",
+  critical: "#f87171", high: "#fb923c", medium: "#facc15", low: "#60a5fa", info: "#a1a1aa",
+};
+
+const BG_COLORS: Record<string, string> = {
+  critical: "rgba(220,38,38,0.15)", high: "rgba(234,88,12,0.15)",
+  medium: "rgba(234,179,8,0.15)", low: "rgba(59,130,246,0.15)", info: "rgba(107,107,128,0.15)",
 };
 
 export default function AuditPage() {
@@ -38,22 +43,34 @@ export default function AuditPage() {
   }, []);
 
   if (!report) return (
-    <div className="text-center py-20">
-      <p className="text-gray-400">No audit data.</p>
-      <a href="/" className="text-yellow-400 hover:underline mt-4 inline-block">Upload a contract</a>
+    <div className="flex flex-col items-center justify-center py-24">
+      <div className="glass rounded-3xl p-12 text-center max-w-md">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-white/[0.04] flex items-center justify-center">
+          <svg className="w-7 h-7 text-[#555566]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+        </div>
+        <p className="text-[#6b6b80] text-sm mb-4">No audit data found.</p>
+        <a href="/" className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-black rounded-2xl transition-all hover:opacity-90"
+          style={{ background: "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)" }}>
+          Upload a contract
+        </a>
+      </div>
     </div>
   );
 
   const { summary: s, findings } = report;
   const chartData = [
-    { name: "Critical", value: s.critical, color: COLORS.critical },
-    { name: "High", value: s.high, color: COLORS.high },
-    { name: "Medium", value: s.medium, color: COLORS.medium },
-    { name: "Low", value: s.low, color: COLORS.low },
-    { name: "Info", value: s.info, color: COLORS.info },
+    { name: "Critical", value: s.critical, color: "#f87171" },
+    { name: "High", value: s.high, color: "#fb923c" },
+    { name: "Medium", value: s.medium, color: "#facc15" },
+    { name: "Low", value: s.low, color: "#60a5fa" },
+    { name: "Info", value: s.info, color: "#a1a1aa" },
   ].filter(d => d.value > 0);
 
-  const scoreColor = s.overallScore >= 80 ? "text-green-400" : s.overallScore >= 60 ? "text-yellow-400" : "text-red-400";
+  const scoreColor = s.overallScore >= 80 ? "#4ade80" : s.overallScore >= 60 ? "#facc15" : "#f87171";
+  const scoreLabel = s.overallScore >= 80 ? "Secure" : s.overallScore >= 60 ? "Moderate" : "At Risk";
 
   const handlePublish = async () => {
     setPublishing(true);
@@ -69,75 +86,150 @@ export default function AuditPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{s.contractName}</h1>
-          <p className="text-sm text-gray-500 font-mono mt-1">{s.contractHash}</p>
+          <h1 className="text-2xl font-bold text-white">{s.contractName}</h1>
+          <p className="text-xs text-[#555566] font-mono mt-1.5 break-all">{s.contractHash}</p>
         </div>
-        <button onClick={wallet ? handlePublish : async () => { const w = await connectWallet(); setWallet(w.address); }}
+        <button
+          onClick={wallet ? handlePublish : async () => { const w = await connectWallet(); setWallet(w.address); }}
           disabled={publishing || !!txHash}
-          className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl disabled:opacity-50 transition-all">
+          className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-black rounded-2xl disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          style={{ background: txHash ? "#4ade80" : "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)" }}
+        >
+          {txHash ? (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+          ) : (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          )}
           {!wallet ? "Connect Wallet" : publishing ? "Publishing..." : txHash ? "Published!" : "Publish to BNB Chain"}
         </button>
       </div>
 
+      {/* TX Success */}
       {txHash && (
-        <div className="bg-green-900/30 border border-green-700 rounded-xl p-4">
-          <p className="text-green-400 font-semibold">Audit published on BNB Chain!</p>
+        <div className="glass rounded-2xl p-4 border-l-2 border-[#4ade80]">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-5 h-5 rounded-full bg-[#4ade80]/20 flex items-center justify-center">
+              <svg className="w-3 h-3 text-[#4ade80]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <p className="text-sm font-medium text-[#4ade80]">Audit published on BNB Chain</p>
+          </div>
           <a href={`${BSC_TESTNET.explorer}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-            className="text-sm text-green-300 hover:underline break-all">View: {txHash}</a>
+            className="text-xs text-[#6b6b80] hover:text-[#f5a623] font-mono break-all transition-colors">{txHash}</a>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-          <div className={`text-7xl font-bold ${scoreColor}`}>{s.overallScore}</div>
-          <div className="text-gray-400 mt-2">Safety Score</div>
-          <div className="flex justify-center gap-3 mt-4 flex-wrap">
-            {s.critical > 0 && <span className="px-2 py-1 bg-red-600/20 text-red-400 rounded text-xs">Critical: {s.critical}</span>}
-            {s.high > 0 && <span className="px-2 py-1 bg-orange-600/20 text-orange-400 rounded text-xs">High: {s.high}</span>}
-            {s.medium > 0 && <span className="px-2 py-1 bg-yellow-600/20 text-yellow-400 rounded text-xs">Medium: {s.medium}</span>}
-            {s.low > 0 && <span className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs">Low: {s.low}</span>}
-            {s.info > 0 && <span className="px-2 py-1 bg-gray-600/20 text-gray-400 rounded text-xs">Info: {s.info}</span>}
+      {/* Score + Chart Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Score Card */}
+        <div className="glass rounded-2xl p-8 text-center">
+          <div className="relative inline-flex items-center justify-center mb-4">
+            <svg className="w-32 h-32" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="8" />
+              <circle cx="60" cy="60" r="52" fill="none" stroke={scoreColor} strokeWidth="8"
+                strokeDasharray={`${(s.overallScore / 100) * 327} 327`}
+                strokeLinecap="round" transform="rotate(-90 60 60)"
+                style={{ filter: `drop-shadow(0 0 8px ${scoreColor}40)` }} />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-bold" style={{ color: scoreColor }}>{s.overallScore}</span>
+              <span className="text-[10px] text-[#6b6b80] uppercase tracking-wider mt-0.5">{scoreLabel}</span>
+            </div>
+          </div>
+          <p className="text-xs text-[#6b6b80] mb-4">Safety Score</p>
+          <div className="flex justify-center gap-2 flex-wrap">
+            {s.critical > 0 && <span className="pill pill-critical">Critical: {s.critical}</span>}
+            {s.high > 0 && <span className="pill pill-high">High: {s.high}</span>}
+            {s.medium > 0 && <span className="pill pill-medium">Medium: {s.medium}</span>}
+            {s.low > 0 && <span className="pill pill-low">Low: {s.low}</span>}
+            {s.info > 0 && <span className="pill pill-info">Info: {s.info}</span>}
           </div>
         </div>
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8">
-          <h3 className="text-center text-gray-400 mb-4">Severity Distribution</h3>
+
+        {/* Chart Card */}
+        <div className="glass rounded-2xl p-8">
+          <p className="text-xs text-[#6b6b80] text-center mb-4 uppercase tracking-wider">Severity Distribution</p>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <PieChart><Pie data={chartData} cx="50%" cy="50%" outerRadius={80} dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}>
-                {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
-              </Pie><Tooltip /></PieChart>
+              <PieChart>
+                <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={78} dataKey="value" paddingAngle={3} strokeWidth={0}
+                  label={({ name, value }) => `${name}: ${value}`}>
+                  {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: "#13131a", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", fontSize: "12px" }}
+                  itemStyle={{ color: "#e8e8ed" }}
+                />
+              </PieChart>
             </ResponsiveContainer>
-          ) : <div className="flex items-center justify-center h-[200px] text-green-400">No vulnerabilities!</div>}
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[200px]">
+              <div className="w-12 h-12 rounded-2xl bg-[#4ade80]/10 flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-[#4ade80]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <p className="text-sm text-[#4ade80]">No vulnerabilities found</p>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* AI Summary */}
       {report.aiSummary && (
-        <div className="bg-gray-900/50 border-l-4 border-yellow-500 rounded-r-xl p-6">
-          <h3 className="text-yellow-400 font-semibold mb-2">AI Assessment</h3>
-          <p className="text-gray-300">{report.aiSummary}</p>
+        <div className="glass rounded-2xl p-6 border-l-2 border-[#f5a623]">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-[#f5a623]/10 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#f5a623]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" /><path d="M12 2v2m0 16v2m-7.07-3.93l1.41-1.41m9.9-9.9l1.41-1.41M2 12h2m16 0h2m-3.93 7.07l-1.41-1.41M7.05 7.05L5.64 5.64" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-white">AI Assessment</h3>
+          </div>
+          <p className="text-sm text-[#9999aa] leading-relaxed">{report.aiSummary}</p>
         </div>
       )}
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Findings ({s.totalFindings})</h2>
+      {/* Findings */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Findings</h2>
+          <span className="text-xs text-[#555566]">{s.totalFindings} total</span>
+        </div>
         {findings.map((f, i) => (
-          <div key={i} className="border border-gray-800 rounded-xl p-5 bg-gray-900/30 space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <span className="px-2 py-1 rounded text-xs font-bold uppercase"
-                  style={{ backgroundColor: (COLORS[f.severity] || "#6b7280") + "33", color: COLORS[f.severity] || "#6b7280" }}>
-                  {f.severity}</span>
-                <h3 className="font-semibold text-white">{f.id} — {f.title}</h3>
+          <div key={i} className="glass glass-hover rounded-2xl p-5 space-y-3 transition-all">
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="pill shrink-0" style={{ backgroundColor: BG_COLORS[f.severity] || BG_COLORS.info, color: COLORS[f.severity] || COLORS.info }}>
+                  {f.severity}
+                </span>
+                <h3 className="text-sm font-medium text-white truncate">{f.id} — {f.title}</h3>
               </div>
-              <span className="text-xs text-gray-500">{f.detector} | {f.confidence}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] text-[#555566] font-mono">{f.detector}</span>
+                <span className="w-1 h-1 rounded-full bg-[#333344]" />
+                <span className="text-[10px] text-[#555566]">{f.confidence}</span>
+              </div>
             </div>
-            <p className="text-gray-400 text-sm">{f.description}</p>
-            {f.snippet && <pre className="bg-gray-950 rounded-lg p-3 text-sm overflow-x-auto"><code className="text-sky-300">Line {f.location.line}: {f.snippet}</code></pre>}
-            <p className="text-green-400 text-sm"><strong>Fix:</strong> {f.recommendation}</p>
+            <p className="text-xs text-[#8888a0] leading-relaxed">{f.description}</p>
+            {f.snippet && (
+              <pre className="bg-[#0b0b0e] rounded-xl p-3 text-xs overflow-x-auto border border-white/[0.04]">
+                <code className="text-[#60a5fa]">
+                  <span className="text-[#555566] select-none">Line {f.location.line}  </span>{f.snippet}
+                </code>
+              </pre>
+            )}
+            <div className="flex items-start gap-2 bg-[#4ade80]/[0.04] rounded-xl p-3">
+              <svg className="w-3.5 h-3.5 text-[#4ade80] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <p className="text-xs text-[#4ade80]/80 leading-relaxed">{f.recommendation}</p>
+            </div>
           </div>
         ))}
       </div>

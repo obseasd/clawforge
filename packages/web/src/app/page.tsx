@@ -5,6 +5,14 @@ import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+const EXAMPLES = [
+  { name: "ReentrancyVault", label: "Reentrancy", file: "ReentrancyVault.sol" },
+  { name: "UnsafeOracle", label: "Oracle Manipulation", file: "UnsafeOracle.sol" },
+  { name: "WeakToken", label: "Overflow", file: "WeakToken.sol" },
+  { name: "BrokenStaking", label: "Staking Bug", file: "BrokenStaking.sol" },
+  { name: "ProxyWallet", label: "Delegatecall", file: "ProxyWallet.sol" },
+];
+
 export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -54,76 +62,86 @@ export default function Home() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      <section className="text-center space-y-6 pt-12">
-        <div className="flex justify-center">
+    <div className="flex flex-col items-center">
+      {/* Hero */}
+      <section className="text-center pt-16 pb-12 max-w-2xl">
+        <div className="flex justify-center mb-8">
           <Image
             src="/clawforge.png"
-            alt="ClawForge Logo"
-            width={160}
-            height={160}
+            alt="ClawForge"
+            width={88}
+            height={88}
             priority
-            className="drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+            className="drop-shadow-[0_0_40px_rgba(245,166,35,0.3)]"
           />
         </div>
-        <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+        <h1 className="text-5xl font-bold tracking-tight text-gold-gradient mb-4">
           ClawForge
         </h1>
-        <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          AI-Powered Smart Contract Security Auditor for BNB Chain.
+        <p className="text-lg text-[#9999aa] leading-relaxed mb-8">
+          AI-powered smart contract security auditor for BNB Chain.
           <br />
-          Detect vulnerabilities. Get proof-of-audit NFTs on-chain.
+          Detect vulnerabilities. Mint proof-of-audit NFTs on-chain.
         </p>
-        <div className="flex justify-center gap-4 text-sm text-gray-500">
-          <span className="px-3 py-1 bg-gray-800 rounded-full">8 Static Detectors</span>
-          <span className="px-3 py-1 bg-gray-800 rounded-full">Claude AI Analysis</span>
-          <span className="px-3 py-1 bg-gray-800 rounded-full">On-Chain NFT Proof</span>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {["8 Detectors", "Claude AI", "On-Chain NFT"].map((tag) => (
+            <span key={tag} className="px-3 py-1.5 text-xs font-medium text-[#8888a0] bg-white/[0.03] border border-white/[0.06] rounded-full">
+              {tag}
+            </span>
+          ))}
         </div>
       </section>
 
-      {isAuditing ? (
-        <div className="border border-gray-700 rounded-2xl p-16 text-center space-y-6 bg-gray-900/50">
-          <div className="text-5xl animate-pulse">&#128269;</div>
-          <p className="text-lg text-gray-300">{stage}</p>
-          <div className="w-full bg-gray-800 rounded-full h-3 max-w-md mx-auto">
-            <div
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-700"
-              style={{ width: `${progress}%` }}
-            />
+      {/* Upload Card */}
+      <section className="w-full max-w-lg">
+        {isAuditing ? (
+          <div className="glass rounded-3xl p-10 text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[#f5a623]/10 flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#f5a623] animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-white mb-4">{stage}</p>
+            <div className="w-full bg-white/[0.06] rounded-full h-1.5 mb-2">
+              <div
+                className="h-1.5 rounded-full transition-all duration-700 ease-out"
+                style={{
+                  width: `${progress}%`,
+                  background: "linear-gradient(90deg, #f5a623, #d97706)",
+                }}
+              />
+            </div>
+            <p className="text-xs text-[#555566]">{progress}%</p>
           </div>
-          <p className="text-sm text-gray-500">{progress}%</p>
-        </div>
-      ) : (
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all duration-300 ${
-            isDragActive
-              ? "border-yellow-400 bg-yellow-400/5 scale-[1.02]"
-              : "border-gray-600 hover:border-gray-400 hover:bg-gray-900/30"
-          }`}
-        >
-          <input {...getInputProps()} />
-          <div className="space-y-4">
-            <div className="text-6xl">&#128737;</div>
-            <p className="text-xl text-gray-300">
-              Drop your <span className="text-yellow-400 font-mono">.sol</span> file here
+        ) : (
+          <div
+            {...getRootProps()}
+            className={`glass glass-hover rounded-3xl p-10 text-center cursor-pointer group
+              ${isDragActive ? "!border-[#f5a623]/40 !bg-[#f5a623]/[0.04] scale-[1.01]" : ""}`}
+          >
+            <input {...getInputProps()} />
+            <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-[#f5a623]/10 flex items-center justify-center group-hover:bg-[#f5a623]/15">
+              <svg className="w-7 h-7 text-[#f5a623]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-white mb-1">
+              Drop your <span className="text-[#f5a623] font-mono">.sol</span> file here
             </p>
-            <p className="text-sm text-gray-500">or click to browse</p>
+            <p className="text-xs text-[#555566]">or click to browse</p>
           </div>
-        </div>
-      )}
+        )}
+      </section>
 
+      {/* Example Contracts */}
       {!isAuditing && (
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-300 text-center">Try an Example Contract</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {[
-              { name: "ReentrancyVault", desc: "Reentrancy + no ACL", file: "ReentrancyVault.sol" },
-              { name: "UnsafeOracle", desc: "Oracle + tx.origin", file: "UnsafeOracle.sol" },
-              { name: "WeakToken", desc: "Overflow + selfdestruct", file: "WeakToken.sol" },
-              { name: "BrokenStaking", desc: "Staking reentrancy", file: "BrokenStaking.sol" },
-              { name: "ProxyWallet", desc: "Proxy + delegatecall", file: "ProxyWallet.sol" },
-            ].map((ex) => (
+        <section className="w-full max-w-lg mt-4">
+          <p className="text-xs text-[#555566] text-center mb-3">or try an example</p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {EXAMPLES.map((ex) => (
               <button
                 key={ex.file}
                 onClick={async () => {
@@ -132,40 +150,45 @@ export default function Home() {
                   const file = new File([text], ex.file, { type: "text/plain" });
                   onDrop([file]);
                 }}
-                className="bg-gray-900/50 border border-gray-700 hover:border-yellow-500/50 rounded-lg p-3 text-left transition-all hover:bg-gray-800/50 group"
+                className="px-3 py-1.5 text-xs font-medium text-[#8888a0] bg-white/[0.03] border border-white/[0.06] rounded-full hover:border-[#f5a623]/30 hover:text-[#f5a623]"
               >
-                <p className="text-sm font-mono text-yellow-400 group-hover:text-yellow-300">{ex.name}</p>
-                <p className="text-xs text-gray-500 mt-1">{ex.desc}</p>
+                {ex.label}
               </button>
             ))}
           </div>
         </section>
       )}
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 space-y-3">
-          <div className="text-3xl">&#9889;</div>
-          <h3 className="font-semibold text-white">Static Analysis</h3>
-          <p className="text-sm text-gray-400">
-            8 detectors: reentrancy, unchecked calls, tx.origin, delegatecall,
-            selfdestruct, integer overflow, access control, uninitialized storage.
-          </p>
-        </div>
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 space-y-3">
-          <div className="text-3xl">&#129504;</div>
-          <h3 className="font-semibold text-white">AI Deep Audit</h3>
-          <p className="text-sm text-gray-400">
-            Claude AI: business logic flaws, flash loan vectors,
-            MEV risks, oracle manipulation, BNB-specific issues.
-          </p>
-        </div>
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 space-y-3">
-          <div className="text-3xl">&#128279;</div>
-          <h3 className="font-semibold text-white">On-Chain Proof</h3>
-          <p className="text-sm text-gray-400">
-            Mint your audit as an NFT on BNB Chain. Immutable, verifiable,
-            transferable proof-of-audit.
-          </p>
+      {/* Features */}
+      <section className="w-full max-w-3xl mt-20 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />,
+              title: "Static Analysis",
+              desc: "8 detectors: reentrancy, unchecked calls, tx.origin, delegatecall, selfdestruct, overflow, access control.",
+            },
+            {
+              icon: <><circle cx="12" cy="12" r="3" /><path d="M12 2v2m0 16v2m-7.07-3.93l1.41-1.41m9.9-9.9l1.41-1.41M2 12h2m16 0h2m-3.93 7.07l-1.41-1.41M7.05 7.05L5.64 5.64" /></>,
+              title: "AI Deep Audit",
+              desc: "Claude AI analyzes business logic, flash loan vectors, MEV risks, oracle manipulation.",
+            },
+            {
+              icon: <><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
+              title: "On-Chain Proof",
+              desc: "Mint your audit as an ERC-721 NFT on BNB Chain. Immutable, verifiable, transferable.",
+            },
+          ].map((f) => (
+            <div key={f.title} className="glass glass-hover rounded-2xl p-5 group">
+              <div className="w-10 h-10 rounded-xl bg-[#f5a623]/10 flex items-center justify-center text-[#f5a623] mb-4 group-hover:bg-[#f5a623]/15">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  {f.icon}
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-white mb-2">{f.title}</h3>
+              <p className="text-xs text-[#6b6b80] leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>
