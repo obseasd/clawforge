@@ -1,0 +1,34 @@
+node_modules/
+dist/
+.next/
+out/
+build/
+coverage/
+cache/
+artifacts/
+typechain-types/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hardhat
+packages/contracts/cache/
+packages/contracts/artifacts/
+packages/contracts/typechain-types/
+
+# Reports
+clawforge-reports/
+
+# Misc
+*.log
+*.tsbuildinfo

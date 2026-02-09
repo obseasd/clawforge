@@ -1,0 +1,19 @@
+{
+  "name": "clawforge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-Powered Smart Contract Security Auditor for BNB Chain",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:contracts": "cd packages/contracts && npx hardhat compile",
+    "test:contracts": "cd packages/contracts && npx hardhat test",
+    "test:cli": "cd packages/cli && npx vitest run",
+    "test": "npm run test:contracts && npm run test:cli",
+    "deploy:testnet": "cd packages/contracts && npx hardhat run scripts/deploy.ts --network bscTestnet",
+    "dev:web": "cd packages/web && npm run dev"
+  },
+  "keywords": ["smart-contract", "security", "audit", "bnb-chain", "ai", "solidity"],
+  "license": "MIT"
+}
