@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" font-family="Inter, system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#111119"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="600" y="45" text-anchor="middle" fill="url(#goldGrad)" font-size="28" font-weight="800" letter-spacing="1">ClawForge Architecture</text>
+  <text x="600" y="68" text-anchor="middle" fill="#9ca3af" font-size="13">AI-Powered Smart Contract Security Auditor for BNB Chain</text>
+
+  <!-- ===== LEFT: INPUT LAYER ===== -->
+  <rect x="30" y="110" width="200" height="230" rx="16" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="110" width="200" height="36" rx="16" fill="url(#goldGrad)"/>
+  <rect x="30" y="130" width="200" height="16" fill="url(#goldGrad)"/>
+  <text x="130" y="133" text-anchor="middle" fill="#000" font-size="13" font-weight="700">INPUT</text>
+
+  <!-- Solidity File -->
+  <rect x="52" y="160" width="156" height="38" rx="8" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="130" y="175" text-anchor="middle" fill="#fbbf24" font-size="20">&#128196;</text>
+  <text x="130" y="191" text-anchor="middle" fill="#e5e7eb" font-size="10">.sol File Upload</text>
+
+  <!-- Web Dashboard -->
+  <rect x="52" y="208" width="156" height="38" rx="8" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="130" y="223" text-anchor="middle" fill="#60a5fa" font-size="20">&#127760;</text>
+  <text x="130" y="239" text-anchor="middle" fill="#e5e7eb" font-size="10">Web Dashboard</text>
+
+  <!-- CLI -->
+  <rect x="52" y="256" width="156" height="38" rx="8" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="130" y="271" text-anchor="middle" fill="#a78bfa" font-size="20">&#9000;</text>
+  <text x="130" y="287" text-anchor="middle" fill="#e5e7eb" font-size="10">CLI Tool</text>
+
+  <text x="130" y="325" text-anchor="middle" fill="#6b7280" font-size="9">Next.js 14 | Commander.js</text>
+
+  <!-- Arrow Input -> Analysis -->
+  <line x1="230" y1="225" x2="290" y2="225" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+  <defs><marker id="arrowGold" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#f59e0b"/></marker></defs>
+
+  <!-- ===== CENTER: ANALYSIS ENGINE ===== -->
+  <rect x="290" y="95" width="340" height="310" rx="16" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="290" y="95" width="340" height="36" rx="16" fill="url(#blueGrad)"/>
+  <rect x="290" y="115" width="340" height="16" fill="url(#blueGrad)"/>
+  <text x="460" y="118" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">ANALYSIS ENGINE</text>
+
+  <!-- Static Analysis Box -->
+  <rect x="310" y="145" width="145" height="170" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="382" y="165" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700">Static Analysis</text>
+  <text x="382" y="180" text-anchor="middle" fill="#64748b" font-size="9">8 Detectors</text>
+
+  <!-- Detectors list -->
+  <text x="322" y="198" fill="#ef4444" font-size="9" font-weight="600">CF-001</text><text x="362" y="198" fill="#9ca3af" font-size="8.5"> Reentrancy</text>
+  <text x="322" y="213" fill="#f97316" font-size="9" font-weight="600">CF-002</text><text x="362" y="213" fill="#9ca3af" font-size="8.5"> Unchecked Calls</text>
+  <text x="322" y="228" fill="#f97316" font-size="9" font-weight="600">CF-003</text><text x="362" y="228" fill="#9ca3af" font-size="8.5"> tx.origin Auth</text>
+  <text x="322" y="243" fill="#f97316" font-size="9" font-weight="600">CF-004</text><text x="362" y="243" fill="#9ca3af" font-size="8.5"> Delegatecall</text>
+  <text x="322" y="258" fill="#f97316" font-size="9" font-weight="600">CF-005</text><text x="362" y="258" fill="#9ca3af" font-size="8.5"> Selfdestruct</text>
+  <text x="322" y="273" fill="#eab308" font-size="9" font-weight="600">CF-006</text><text x="362" y="273" fill="#9ca3af" font-size="8.5"> Int Overflow</text>
+  <text x="322" y="288" fill="#eab308" font-size="9" font-weight="600">CF-007</text><text x="362" y="288" fill="#9ca3af" font-size="8.5"> Access Ctrl</text>
+  <text x="322" y="303" fill="#eab308" font-size="9" font-weight="600">CF-008</text><text x="362" y="303" fill="#9ca3af" font-size="8.5"> Uninit Storage</text>
+
+  <!-- AI Analysis Box -->
+  <rect x="470" y="145" width="145" height="170" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+  <text x="542" y="165" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700">AI Deep Scan</text>
+  <text x="542" y="180" text-anchor="middle" fill="#64748b" font-size="9">Claude API</text>
+
+  <text x="485" y="200" fill="#9ca3af" font-size="9">&#9656; Business Logic</text>
+  <text x="485" y="217" fill="#9ca3af" font-size="9">&#9656; Flash Loan Vectors</text>
+  <text x="485" y="234" fill="#9ca3af" font-size="9">&#9656; MEV Risks</text>
+  <text x="485" y="251" fill="#9ca3af" font-size="9">&#9656; Oracle Manipulation</text>
+  <text x="485" y="268" fill="#9ca3af" font-size="9">&#9656; BNB-Specific Issues</text>
+  <text x="485" y="285" fill="#9ca3af" font-size="9">&#9656; Centralization Risk</text>
+  <text x="485" y="302" fill="#9ca3af" font-size="9">&#9656; Gas Optimization</text>
+
+  <!-- Merge arrow -->
+  <text x="460" y="340" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="600">Deduplicate + Score (0-100)</text>
+
+  <!-- Plus icon between boxes -->
+  <circle cx="460" cy="230" r="14" fill="#1e293b" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="460" y="235" text-anchor="middle" fill="#a78bfa" font-size="18" font-weight="700">+</text>
+
+  <!-- Arrow Analysis -> Report -->
+  <line x1="460" y1="405" x2="460" y2="445" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <defs><marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#3b82f6"/></marker></defs>
+
+  <!-- ===== BOTTOM CENTER: REPORT ===== -->
+  <rect x="330" y="445" width="260" height="80" rx="14" fill="#1a1a2e" stroke="#10b981" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="330" y="445" width="260" height="32" rx="14" fill="url(#greenGrad)"/>
+  <rect x="330" y="461" width="260" height="16" fill="url(#greenGrad)"/>
+  <text x="460" y="467" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">AUDIT REPORT</text>
+
+  <text x="375" y="494" fill="#9ca3af" font-size="10">&#128202; Safety Score</text>
+  <text x="375" y="510" fill="#9ca3af" font-size="10">&#128200; Severity Chart</text>
+  <text x="500" y="494" fill="#9ca3af" font-size="10">&#128221; Findings</text>
+  <text x="500" y="510" fill="#9ca3af" font-size="10">&#128295; Fix Advice</text>
+
+  <!-- Arrow Analysis -> Report (vertical) -->
+  <line x1="460" y1="360" x2="460" y2="445" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <defs><marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#10b981"/></marker></defs>
+
+  <!-- ===== RIGHT: BNB CHAIN LAYER ===== -->
+  <rect x="700" y="95" width="240" height="310" rx="16" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="700" y="95" width="240" height="36" rx="16" fill="url(#goldGrad)"/>
+  <rect x="700" y="115" width="240" height="16" fill="url(#goldGrad)"/>
+  <text x="820" y="118" text-anchor="middle" fill="#000" font-size="13" font-weight="700">BNB CHAIN (Testnet)</text>
+
+  <!-- Smart Contract -->
+  <rect x="720" y="148" width="200" height="75" rx="10" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="820" y="169" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">ClawForgeRegistry.sol</text>
+  <text x="820" y="186" text-anchor="middle" fill="#9ca3af" font-size="10">ERC-721 Audit NFT</text>
+  <text x="820" y="200" text-anchor="middle" fill="#64748b" font-size="9">Solidity 0.8.24 + OpenZeppelin</text>
+  <text x="820" y="215" text-anchor="middle" fill="#64748b" font-size="8">0x6F862dA9...d705879</text>
+
+  <!-- Functions -->
+  <rect x="720" y="235" width="200" height="90" rx="10" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="820" y="255" text-anchor="middle" fill="#60a5fa" font-size="10" font-weight="600">On-Chain Functions</text>
+  <text x="735" y="274" fill="#9ca3af" font-size="9">submitAudit() &#8594; mint NFT</text>
+  <text x="735" y="289" fill="#9ca3af" font-size="9">getAudit() &#8594; read report</text>
+  <text x="735" y="304" fill="#9ca3af" font-size="9">getAuditsByContract()</text>
+  <text x="735" y="319" fill="#9ca3af" font-size="9">getAuditsByAuditor()</text>
+
+  <!-- MetaMask -->
+  <rect x="720" y="338" width="200" height="48" rx="10" fill="#262640" stroke="#f97316" stroke-width="1"/>
+  <text x="820" y="358" text-anchor="middle" fill="#f97316" font-size="11" font-weight="600">&#129418; MetaMask Wallet</text>
+  <text x="820" y="375" text-anchor="middle" fill="#64748b" font-size="9">ethers.js v6 | Chain ID 97</text>
+
+  <!-- Arrow Analysis -> BNB Chain -->
+  <line x1="630" y1="250" x2="700" y2="250" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold2)"/>
+  <defs><marker id="arrowGold2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#f59e0b"/></marker></defs>
+
+  <!-- Arrow Report -> BNB Chain -->
+  <path d="M590,485 Q660,485 720,360" stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arrowGold2)"/>
+  <text x="660" y="440" fill="#fbbf24" font-size="9" font-weight="600" transform="rotate(-35 660 440)">Publish</text>
+
+  <!-- ===== FAR RIGHT: NFT OUTPUT ===== -->
+  <rect x="980" y="130" width="190" height="240" rx="16" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="980" y="130" width="190" height="36" rx="16" fill="url(#purpleGrad)"/>
+  <rect x="980" y="150" width="190" height="16" fill="url(#purpleGrad)"/>
+  <text x="1075" y="153" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">AUDIT NFT (CFAR)</text>
+
+  <rect x="1000" y="180" width="150" height="170" rx="10" fill="#262640" stroke="#374151" stroke-width="1"/>
+  <text x="1075" y="202" text-anchor="middle" fill="#c084fc" font-size="24">&#127968;</text>
+  <text x="1075" y="222" text-anchor="middle" fill="#e5e7eb" font-size="10" font-weight="600">Proof-of-Audit</text>
+  <text x="1075" y="238" text-anchor="middle" fill="#64748b" font-size="9">ERC-721 Token</text>
+
+  <line x1="1010" y1="248" x2="1140" y2="248" stroke="#374151" stroke-width="0.5"/>
+
+  <text x="1015" y="265" fill="#9ca3af" font-size="8.5">&#9656; Contract Hash</text>
+  <text x="1015" y="280" fill="#9ca3af" font-size="8.5">&#9656; Severity Counts</text>
+  <text x="1015" y="295" fill="#9ca3af" font-size="8.5">&#9656; Safety Score</text>
+  <text x="1015" y="310" fill="#9ca3af" font-size="8.5">&#9656; Report Hash</text>
+  <text x="1015" y="325" fill="#9ca3af" font-size="8.5">&#9656; Auditor Address</text>
+  <text x="1015" y="340" fill="#9ca3af" font-size="8.5">&#9656; Timestamp</text>
+
+  <!-- Arrow BNB -> NFT -->
+  <line x1="940" y1="250" x2="980" y2="250" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <defs><marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#8b5cf6"/></marker></defs>
+
+  <!-- ===== BOTTOM: TECH STACK BAR ===== -->
+  <rect x="30" y="570" width="1140" height="110" rx="14" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+  <text x="600" y="596" text-anchor="middle" fill="#6b7280" font-size="11" font-weight="700" letter-spacing="2">TECH STACK</text>
+
+  <!-- Tech badges -->
+  <rect x="55" y="612" width="100" height="28" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="105" y="630" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">Solidity 0.8</text>
+
+  <rect x="170" y="612" width="105" height="28" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+  <text x="222" y="630" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">OpenZeppelin</text>
+
+  <rect x="290" y="612" width="80" height="28" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="330" y="630" text-anchor="middle" fill="#60a5fa" font-size="10" font-weight="600">Hardhat</text>
+
+  <rect x="385" y="612" width="90" height="28" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="430" y="630" text-anchor="middle" fill="#60a5fa" font-size="10" font-weight="600">TypeScript</text>
+
+  <rect x="490" y="612" width="88" height="28" rx="6" fill="#1e293b" stroke="#a78bfa" stroke-width="1"/>
+  <text x="534" y="630" text-anchor="middle" fill="#c084fc" font-size="10" font-weight="600">Claude API</text>
+
+  <rect x="593" y="612" width="80" height="28" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="633" y="630" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">Next.js 14</text>
+
+  <rect x="688" y="612" width="82" height="28" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="729" y="630" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">Tailwind</text>
+
+  <rect x="785" y="612" width="80" height="28" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1"/>
+  <text x="825" y="630" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">Recharts</text>
+
+  <rect x="880" y="612" width="80" height="28" rx="6" fill="#1e293b" stroke="#f97316" stroke-width="1"/>
+  <text x="920" y="630" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="600">ethers.js v6</text>
+
+  <rect x="975" y="612" width="90" height="28" rx="6" fill="#1e293b" stroke="#f97316" stroke-width="1"/>
+  <text x="1020" y="630" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="600">BSC Testnet</text>
+
+  <rect x="1080" y="612" width="70" height="28" rx="6" fill="#1e293b" stroke="#6b7280" stroke-width="1"/>
+  <text x="1115" y="630" text-anchor="middle" fill="#9ca3af" font-size="10" font-weight="600">Vitest</text>
+
+  <!-- Flow label at top -->
+  <text x="130" y="90" text-anchor="middle" fill="#6b7280" font-size="10" font-weight="600" letter-spacing="1">1. UPLOAD</text>
+  <text x="460" y="90" text-anchor="middle" fill="#6b7280" font-size="10" font-weight="600" letter-spacing="1">2. ANALYZE</text>
+  <text x="820" y="90" text-anchor="middle" fill="#6b7280" font-size="10" font-weight="600" letter-spacing="1">3. PUBLISH</text>
+  <text x="1075" y="90" text-anchor="middle" fill="#6b7280" font-size="10" font-weight="600" letter-spacing="1">4. PROOF</text>
+
+  <!-- Verification badge -->
+  <rect x="700" y="400" width="240" height="30" rx="6" fill="#052e16" stroke="#166534" stroke-width="1"/>
+  <text x="820" y="420" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="600">&#9989; Verified on BSCScan</text>
+
+  <!-- Report formats bottom -->
+  <rect x="30" y="445" width="260" height="80" rx="14" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="445" width="260" height="32" rx="14" fill="url(#redGrad)"/>
+  <rect x="30" y="461" width="260" height="16" fill="url(#redGrad)"/>
+  <text x="160" y="467" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">VULNERABILITY FINDINGS</text>
+  <text x="55" y="494" fill="#ef4444" font-size="9" font-weight="700">Critical</text><text x="100" y="494" fill="#9ca3af" font-size="9"> -25pts</text>
+  <text x="155" y="494" fill="#f97316" font-size="9" font-weight="700">High</text><text x="183" y="494" fill="#9ca3af" font-size="9"> -15pts</text>
+  <text x="55" y="510" fill="#eab308" font-size="9" font-weight="700">Medium</text><text x="107" y="510" fill="#9ca3af" font-size="9"> -8pts</text>
+  <text x="155" y="510" fill="#3b82f6" font-size="9" font-weight="700">Low</text><text x="178" y="510" fill="#9ca3af" font-size="9"> -3pts</text>
+  <text x="220" y="510" fill="#6b7280" font-size="9" font-weight="700">Info</text><text x="243" y="510" fill="#9ca3af" font-size="9"> -1pt</text>
+
+  <!-- Arrow from analysis down to vulnerability -->
+  <path d="M380,360 L160,445" stroke="#ef4444" stroke-width="1.5" fill="none" marker-end="url(#arrowRed)"/>
+  <defs><marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#ef4444"/></marker></defs>
+
+  <!-- 34 tests badge -->
+  <rect x="980" y="400" width="190" height="30" rx="6" fill="#052e16" stroke="#166534" stroke-width="1"/>
+  <text x="1075" y="420" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="600">&#9989; 34/34 Tests Passing</text>
+
+  <!-- Hackathon badge bottom right -->
+  <rect x="980" y="445" width="190" height="80" rx="14" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1" filter="url(#shadow)"/>
+  <text x="1075" y="472" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">Good Vibes Only</text>
+  <text x="1075" y="490" text-anchor="middle" fill="#f97316" font-size="10">OpenClaw Edition</text>
+  <text x="1075" y="508" text-anchor="middle" fill="#9ca3af" font-size="9">Builders' Tools Track</text>
+  <text x="1075" y="520" text-anchor="middle" fill="#64748b" font-size="8">BNB Chain Hackathon</text>
+</svg>
