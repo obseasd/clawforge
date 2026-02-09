@@ -1,0 +1,72 @@
+export const REGISTRY_ADDRESS = (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
+  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+
+export const REGISTRY_ABI = [
+  {
+    inputs: [
+      { name: "contractHash", type: "bytes32" },
+      { name: "auditedContract", type: "address" },
+      { name: "criticalCount", type: "uint8" },
+      { name: "highCount", type: "uint8" },
+      { name: "mediumCount", type: "uint8" },
+      { name: "lowCount", type: "uint8" },
+      { name: "infoCount", type: "uint8" },
+      { name: "overallScore", type: "uint8" },
+      { name: "reportHash", type: "bytes32" },
+      { name: "reportURI", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    name: "submitAudit",
+    outputs: [{ name: "tokenId", type: "uint256" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    name: "getAudit",
+    outputs: [
+      {
+        components: [
+          { name: "contractHash", type: "bytes32" },
+          { name: "auditedContract", type: "address" },
+          { name: "criticalCount", type: "uint8" },
+          { name: "highCount", type: "uint8" },
+          { name: "mediumCount", type: "uint8" },
+          { name: "lowCount", type: "uint8" },
+          { name: "infoCount", type: "uint8" },
+          { name: "overallScore", type: "uint8" },
+          { name: "reportHash", type: "bytes32" },
+          { name: "reportURI", type: "string" },
+          { name: "auditor", type: "address" },
+          { name: "timestamp", type: "uint256" },
+          { name: "chainId", type: "uint256" },
+        ],
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getAuditCount",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalCriticalFindings",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "totalHighFindings",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
