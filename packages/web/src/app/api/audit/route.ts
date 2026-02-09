@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
                   findings.push({
                     id: `AI-${String(idx + 1).padStart(3, "0")}`,
                     title: (f.title as string) || "AI Finding",
-                    severity: (f.severity as string) || "info",
+                    severity: ((f.severity as string) || "info").toLowerCase().replace("informational", "info"),
                     description: (f.description as string) || "",
                     location: { line: (f.line as number) || 0, column: 0, length: 0 },
                     snippet: (f.snippet as string) || "",
