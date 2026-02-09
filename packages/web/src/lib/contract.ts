@@ -1,5 +1,5 @@
 export const REGISTRY_ADDRESS = (process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
-  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+  "0x6F862dA94ED6Af3De8ed90D6853C24E91d705879") as `0x${string}`;
 
 export const REGISTRY_ABI = [
   {
