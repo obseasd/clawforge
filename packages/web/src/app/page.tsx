@@ -13,10 +13,25 @@ const EXAMPLES = [
   { name: "ProxyWallet", label: "Delegatecall", file: "ProxyWallet.sol" },
 ];
 
+type Tab = "upload" | "address";
+
+function extractAddress(input: string): string | null {
+  const trimmed = input.trim();
+  // Direct address
+  if (/^0x[a-fA-F0-9]{40}$/.test(trimmed)) return trimmed;
+  // BSCScan URL
+  const match = trimmed.match(/(?:bscscan\.com)\/address\/(0x[a-fA-F0-9]{40})/i);
+  return match ? match[1] : null;
+}
+
 export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState("");
+  const [tab, setTab] = useState<Tab>("upload");
+  const [addressInput, setAddressInput] = useState("");
+  const [network, setNetwork] = useState<"mainnet" | "testnet">("mainnet");
+  const [fetchError, setFetchError] = useState("");
   const router = useRouter();
 
   const onDrop = useCallback(
@@ -55,6 +70,43 @@ export default function Home() {
     [router]
   );
 
+  const handleAddressAudit = async () => {
+    setFetchError("");
+    const address = extractAddress(addressInput);
+    if (!address) {
+      setFetchError("Enter a valid contract address (0x...) or BSCScan URL");
+      return;
+    }
+
+    setIsAuditing(true);
+    setProgress(5);
+    setStage("Fetching contract from BSCScan...");
+
+    try {
+      const res = await fetch("/api/fetch-contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, network }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setIsAuditing(false);
+        setFetchError(data.error || "Failed to fetch contract");
+        return;
+      }
+
+      setProgress(15);
+      setStage("Contract fetched. Starting audit...");
+
+      const file = new File([data.source], `${data.name}.sol`, { type: "text/plain" });
+      onDrop([file]);
+    } catch {
+      setIsAuditing(false);
+      setFetchError("Network error. Please try again.");
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "text/plain": [".sol"] },
@@ -92,7 +144,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Upload Card */}
+      {/* Tab Toggle */}
+      {!isAuditing && (
+        <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] mb-4">
+          <button
+            onClick={() => { setTab("upload"); setFetchError(""); }}
+            className={`px-4 py-1.5 text-xs font-medium rounded-xl transition-all ${
+              tab === "upload"
+                ? "text-[#f5a623] bg-[#f5a623]/10"
+                : "text-[#6b6b80] hover:text-[#9999aa]"
+            }`}
+          >
+            Upload File
+          </button>
+          <button
+            onClick={() => { setTab("address"); setFetchError(""); }}
+            className={`px-4 py-1.5 text-xs font-medium rounded-xl transition-all ${
+              tab === "address"
+                ? "text-[#f5a623] bg-[#f5a623]/10"
+                : "text-[#6b6b80] hover:text-[#9999aa]"
+            }`}
+          >
+            Contract Address
+          </button>
+        </div>
+      )}
+
+      {/* Main Card */}
       <section className="w-full max-w-lg">
         {isAuditing ? (
           <div className="glass rounded-3xl p-10 text-center">
@@ -114,7 +192,7 @@ export default function Home() {
             </div>
             <p className="text-xs text-[#555566]">{progress}%</p>
           </div>
-        ) : (
+        ) : tab === "upload" ? (
           <div
             {...getRootProps()}
             className={`glass glass-hover rounded-3xl p-10 text-center cursor-pointer group
@@ -132,6 +210,56 @@ export default function Home() {
               Drop your <span className="text-[#f5a623] font-mono">.sol</span> file here
             </p>
             <p className="text-xs text-[#555566]">or click to browse</p>
+          </div>
+        ) : (
+          <div className="glass rounded-3xl p-8 space-y-4">
+            <div className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-[#f5a623]/10 flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#f5a623]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                <polyline points="22 2 13 11 9 7" />
+              </svg>
+            </div>
+            <div>
+              <input
+                type="text"
+                value={addressInput}
+                onChange={(e) => { setAddressInput(e.target.value); setFetchError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleAddressAudit()}
+                placeholder="0x... or BSCScan URL"
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm text-white font-mono placeholder-[#444455] focus:border-[#f5a623]/40 focus:outline-none transition-colors"
+              />
+              {fetchError && (
+                <p className="text-xs text-[#f87171] mt-2 px-1">{fetchError}</p>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                {(["mainnet", "testnet"] as const).map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setNetwork(n)}
+                    className={`px-3 py-1 text-[11px] font-medium rounded-lg transition-all capitalize ${
+                      network === n
+                        ? "text-[#f5a623] bg-[#f5a623]/10"
+                        : "text-[#555566] hover:text-[#8888a0]"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleAddressAudit}
+                disabled={!addressInput.trim()}
+                className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-black rounded-xl disabled:opacity-40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ background: "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)" }}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Audit
+              </button>
+            </div>
           </div>
         )}
       </section>
