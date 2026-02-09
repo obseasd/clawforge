@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const CHAIN_IDS: Record<string, number> = {
   mainnet: 56,
   testnet: 97,
+  opbnb: 204,
 };
 const ETHERSCAN_V2 = "https://api.etherscan.io/v2/api";
 

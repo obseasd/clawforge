@@ -36,6 +36,12 @@ export default function AuditPage() {
   const [wallet, setWallet] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [txHash, setTxHash] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "error" | "success" } | null>(null);
+
+  const showToast = (message: string, type: "error" | "success" = "error") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
+  };
 
   useEffect(() => {
     const s = sessionStorage.getItem("auditResult");
@@ -81,7 +87,7 @@ export default function AuditPage() {
       const tx = await c.submitAudit(s.contractHash, ethers.ZeroAddress, s.critical, s.high, s.medium, s.low, s.info, s.overallScore, s.reportHash, "", 97);
       const receipt = await tx.wait();
       setTxHash(receipt.hash);
-    } catch (e: unknown) { alert("Failed: " + (e instanceof Error ? e.message : String(e))); }
+    } catch (e: unknown) { showToast(e instanceof Error ? e.message : String(e), "error"); }
     setPublishing(false);
   };
 
@@ -233,6 +239,25 @@ export default function AuditPage() {
           </div>
         ))}
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-lg backdrop-blur-xl border transition-all animate-[slideUp_0.3s_ease-out] ${
+          toast.type === "error"
+            ? "bg-[#f87171]/10 border-[#f87171]/20 text-[#f87171]"
+            : "bg-[#4ade80]/10 border-[#4ade80]/20 text-[#4ade80]"
+        }`}>
+          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {toast.type === "error"
+              ? <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></>
+              : <polyline points="20 6 9 17 4 12" />}
+          </svg>
+          <p className="text-sm max-w-xs truncate">{toast.message}</p>
+          <button onClick={() => setToast(null)} className="ml-1 opacity-60 hover:opacity-100">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

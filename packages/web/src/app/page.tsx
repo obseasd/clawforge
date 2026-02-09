@@ -30,7 +30,7 @@ export default function Home() {
   const [stage, setStage] = useState("");
   const [tab, setTab] = useState<Tab>("upload");
   const [addressInput, setAddressInput] = useState("");
-  const [network, setNetwork] = useState<"mainnet" | "testnet">("mainnet");
+  const [network, setNetwork] = useState<"mainnet" | "testnet" | "opbnb">("mainnet");
   const [fetchError, setFetchError] = useState("");
   const router = useRouter();
 
@@ -234,17 +234,17 @@ export default function Home() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1 p-0.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                {(["mainnet", "testnet"] as const).map((n) => (
+                {(["mainnet", "testnet", "opbnb"] as const).map((n) => (
                   <button
                     key={n}
                     onClick={() => setNetwork(n)}
-                    className={`px-3 py-1 text-[11px] font-medium rounded-lg transition-all capitalize ${
+                    className={`px-3 py-1 text-[11px] font-medium rounded-lg transition-all ${
                       network === n
                         ? "text-[#f5a623] bg-[#f5a623]/10"
                         : "text-[#555566] hover:text-[#8888a0]"
                     }`}
                   >
-                    {n}
+                    {n === "opbnb" ? "opBNB" : n.charAt(0).toUpperCase() + n.slice(1)}
                   </button>
                 ))}
               </div>

@@ -69,6 +69,12 @@ body {
 /* Code blocks */
 pre code { font-family: var(--font-geist-mono), 'JetBrains Mono', monospace; }
 
+/* Toast animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
 }
