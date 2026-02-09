@@ -1,7 +1,7 @@
 {
-  "address": "0x6F862dA94ED6Af3De8ed90D6853C24E91d705879",
-  "network": "bscTestnet",
-  "chainId": "97",
+  "address": "0x5e3Fe22590C61818e13CB3F1f75a809A1b014BC3",
+  "network": "bsc",
+  "chainId": "56",
   "deployer": "0x44028d1B41cD8E66047Fb79119711d5507250779",
-  "timestamp": "2026-02-09T13:43:25.800Z"
+  "timestamp": "2026-02-09T18:56:49.112Z"
 }
