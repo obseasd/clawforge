@@ -2,19 +2,19 @@
 
 **AI-Powered Smart Contract Security Auditor for BNB Chain**
 
-ClawForge combines static analysis with Claude AI to detect vulnerabilities in Solidity smart contracts and mint on-chain proof-of-audit NFTs (ERC-721) on BNB Chain.
+ClawForge combines static analysis with Claude AI to detect vulnerabilities in Solidity smart contracts and mint on-chain proof-of-audit NFTs (ERC-721) on BNB Chain. Audit by file upload or by pasting any verified contract address from BSC Mainnet, Testnet, or opBNB.
 
-![ClawForge Architecture](architecture.png)
+**Live Demo**: [web-lake-eight-59.vercel.app](https://web-lake-eight-59.vercel.app)
 
 ---
 
 ## How It Works
 
 ```
-Upload .sol  →  Static Analysis (8 detectors)  →  AI Deep Scan (Claude)  →  Review Findings  →  Mint Audit NFT
+Upload .sol / Paste Address  →  Static Analysis (8 detectors)  →  AI Deep Scan (Claude)  →  Review Findings  →  Mint Audit NFT
 ```
 
-1. **Upload** a Solidity file (.sol) via CLI or web dashboard
+1. **Upload** a Solidity file (.sol) or **paste a contract address** (BSCScan URL or `0x...`) via the web dashboard or CLI
 2. **Static analysis** runs 8 vulnerability detectors (reentrancy, tx.origin, selfdestruct, delegatecall, unchecked calls, integer overflow, access control, uninitialized storage)
 3. **AI analysis** via Claude API performs deep logic review (flash loans, MEV, oracle manipulation, business logic)
 4. **Review** the consolidated report with safety score (0-100), severity breakdown, and remediation advice
@@ -45,10 +45,11 @@ clawforge/
 │   │
 │   └── web/             # Next.js 14 Dashboard
 │       └── src/app/
-│           ├── page.tsx         # Landing + drag-and-drop upload
-│           ├── audit/           # Results (score, chart, findings)
-│           ├── explore/         # On-chain audit explorer
-│           └── api/audit/       # Backend analysis endpoint
+│           ├── page.tsx               # Landing (file upload + address audit)
+│           ├── audit/                 # Results (score, chart, findings)
+│           ├── explore/               # On-chain audit explorer
+│           ├── api/audit/             # Backend analysis endpoint
+│           └── api/fetch-contract/    # BSCScan contract fetcher (Etherscan V2)
 │
 ├── .env.example
 └── README.md
@@ -79,6 +80,7 @@ clawforge/
 - Stores: contract hash, severity counts, safety score, report hash, auditor address, timestamp, chain ID
 - Query functions: `getAudit()`, `getAuditsByContract()`, `getAuditsByAuditor()`, `getAuditCount()`
 - Network: BSC Testnet (Chain ID 97)
+- Multi-chain contract fetching: BSC Mainnet (56), BSC Testnet (97), opBNB (204)
 
 ---
 
@@ -151,7 +153,7 @@ npm run dev:web
 # Open http://localhost:3000
 ```
 
-1. Drag & drop a `.sol` file on the landing page
+1. Drag & drop a `.sol` file **or paste a contract address** on the landing page
 2. Review the safety score, severity chart, and findings
 3. Connect MetaMask and publish the audit on BNB Chain
 
@@ -164,8 +166,9 @@ npm run dev:web
 | Smart Contracts | Solidity 0.8.24, OpenZeppelin, Hardhat |
 | CLI | TypeScript, Commander.js, Vitest |
 | AI Engine | Anthropic Claude API (claude-sonnet-4-5-20250929) |
-| Blockchain | ethers.js v6, BSC Testnet (Chain ID 97) |
+| Blockchain | ethers.js v6, BSC Mainnet + Testnet + opBNB |
 | Web Dashboard | Next.js 14, Tailwind CSS, Recharts |
+| Contract Fetching | Etherscan V2 Unified API (BSCScan) |
 | Wallet | ethers.js BrowserProvider + MetaMask |
 
 ---
@@ -187,6 +190,14 @@ Total:           34/34 tests passing
 Built for **Good Vibes Only: OpenClaw Edition** on BNB Chain — Builders' Tools track.
 
 ClawForge addresses a critical gap in the BNB ecosystem: accessible, automated smart contract security auditing with on-chain proof. By combining static analysis with AI deep scanning and minting immutable NFT audit reports, we make security auditing transparent, verifiable, and permanent.
+
+### Key Differentiators
+
+- **Audit by Address** — Paste any verified BSCScan contract address (or URL) to instantly fetch and audit the source code
+- **Multi-Chain** — BSC Mainnet, BSC Testnet, and opBNB supported
+- **On-Chain NFTs** — ERC-721 proof-of-audit minted on BNB Chain
+- **34/34 Tests** — Full test coverage across contracts and CLI
+- **5 Example Contracts** — Pre-loaded vulnerable contracts for instant demo
 
 ---
 
