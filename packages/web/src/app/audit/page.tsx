@@ -164,7 +164,7 @@ export default function AuditPage() {
       const { signer } = await connectWallet();
       setWallet(await signer.getAddress());
       const c = new ethers.Contract(REGISTRY_ADDRESS, SUBMIT_ABI, signer);
-      const tx = await c.submitAudit(s.contractHash, ethers.ZeroAddress, s.critical, s.high, s.medium, s.low, s.info, s.overallScore, s.reportHash, "", 97);
+      const tx = await c.submitAudit(s.contractHash, ethers.ZeroAddress, s.critical, s.high, s.medium, s.low, s.info, s.overallScore, s.reportHash, "", 56);
       const receipt = await tx.wait();
       setTxHash(receipt.hash);
     } catch (e: unknown) { showToast(e instanceof Error ? e.message : String(e), "error"); }

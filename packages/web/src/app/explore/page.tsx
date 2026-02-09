@@ -2,8 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { REGISTRY_ADDRESS, REGISTRY_ABI } from "@/lib/contract";
-import { BSC_TESTNET } from "@/lib/wagmi";
+import { REGISTRY_ABI } from "@/lib/contract";
+
+const NETWORKS = [
+  {
+    id: "bsc",
+    label: "BNB Chain",
+    chainId: 56,
+    rpc: "https://bsc-dataseed.binance.org/",
+    explorer: "https://bscscan.com",
+    registry: "0x5e3Fe22590C61818e13CB3F1f75a809A1b014BC3",
+  },
+  {
+    id: "testnet",
+    label: "Testnet",
+    chainId: 97,
+    rpc: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    explorer: "https://testnet.bscscan.com",
+    registry: "0x6F862dA94ED6Af3De8ed90D6853C24E91d705879",
+  },
+  {
+    id: "opbnb",
+    label: "opBNB",
+    chainId: 204,
+    rpc: "https://opbnb-mainnet-rpc.bnbchain.org/",
+    explorer: "https://opbnbscan.com",
+    registry: "",
+  },
+];
 
 interface OnChainAudit {
   tokenId: number;
@@ -20,26 +46,37 @@ interface OnChainAudit {
 }
 
 export default function ExplorePage() {
+  const [networkId, setNetworkId] = useState("bsc");
   const [stats, setStats] = useState({ audits: "--", critical: "--", high: "--" });
   const [audits, setAudits] = useState<OnChainAudit[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const network = NETWORKS.find((n) => n.id === networkId)!;
+
   useEffect(() => {
+    setStats({ audits: "--", critical: "--", high: "--" });
+    setAudits([]);
+    setLoading(true);
+
+    if (!network.registry) {
+      setStats({ audits: "0", critical: "0", high: "0" });
+      setLoading(false);
+      return;
+    }
+
     async function load() {
       try {
-        const provider = new ethers.JsonRpcProvider(BSC_TESTNET.rpc);
-        const contract = new ethers.Contract(REGISTRY_ADDRESS, REGISTRY_ABI, provider);
+        const provider = new ethers.JsonRpcProvider(network.rpc);
+        const contract = new ethers.Contract(network.registry, REGISTRY_ABI, provider);
         const count = await contract.getAuditCount();
         const countNum = Number(count);
 
-        // Fetch stats
         const [c, h] = await Promise.all([
           contract.totalCriticalFindings(),
           contract.totalHighFindings(),
         ]);
         setStats({ audits: countNum.toString(), critical: c.toString(), high: h.toString() });
 
-        // Fetch individual audits (last 20 max)
         const start = Math.max(1, countNum - 19);
         const fetches = [];
         for (let i = countNum; i >= start; i--) {
@@ -64,9 +101,9 @@ export default function ExplorePage() {
       } catch {}
       setLoading(false);
     }
-    if (REGISTRY_ADDRESS !== "0x0000000000000000000000000000000000000000") load();
-    else setLoading(false);
-  }, []);
+
+    load();
+  }, [networkId, network]);
 
   const statCards = [
     {
@@ -96,7 +133,24 @@ export default function ExplorePage() {
       {/* Header */}
       <div className="text-center pt-4 pb-2">
         <h1 className="text-2xl font-bold text-white mb-2">On-Chain Explorer</h1>
-        <p className="text-sm text-[#6b6b80]">Browse security audits recorded on BNB Chain</p>
+        <p className="text-sm text-[#6b6b80] mb-5">Browse security audits recorded on BNB Chain</p>
+
+        {/* Network Selector */}
+        <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+          {NETWORKS.map((n) => (
+            <button
+              key={n.id}
+              onClick={() => setNetworkId(n.id)}
+              className={`px-4 py-2 text-xs font-medium rounded-xl transition-all ${
+                networkId === n.id
+                  ? "bg-[#f5a623]/15 text-[#f5a623]"
+                  : "text-[#6b6b80] hover:text-white"
+              }`}
+            >
+              {n.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -136,7 +190,7 @@ export default function ExplorePage() {
           <div className="space-y-2">
             {audits.map((a) => (
               <a key={a.tokenId}
-                href={`${BSC_TESTNET.explorer}/token/${REGISTRY_ADDRESS}?a=${a.tokenId}`}
+                href={`${network.explorer}/token/${network.registry}?a=${a.tokenId}`}
                 target="_blank" rel="noopener noreferrer"
                 className="glass glass-hover rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group block">
                 <div className="flex items-center gap-4 min-w-0">
@@ -177,8 +231,12 @@ export default function ExplorePage() {
                 <polyline points="14 2 14 8 20 8" />
               </svg>
             </div>
-            <p className="text-sm text-[#6b6b80] mb-1">No audits published yet</p>
-            <p className="text-xs text-[#555566]">Be the first to publish an audit on-chain!</p>
+            <p className="text-sm text-[#6b6b80] mb-1">
+              {!network.registry ? "No registry deployed on this network yet" : "No audits published yet"}
+            </p>
+            <p className="text-xs text-[#555566]">
+              {!network.registry ? "Coming soon!" : "Be the first to publish an audit on-chain!"}
+            </p>
           </div>
         )}
       </div>
@@ -196,14 +254,18 @@ export default function ExplorePage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
             <span className="text-xs text-[#6b6b80]">Address</span>
-            <a href={`${BSC_TESTNET.explorer}/address/${REGISTRY_ADDRESS}`} target="_blank" rel="noopener noreferrer"
-              className="text-xs text-[#f5a623] hover:text-[#fbbf24] font-mono transition-colors">{REGISTRY_ADDRESS}</a>
+            {network.registry ? (
+              <a href={`${network.explorer}/address/${network.registry}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs text-[#f5a623] hover:text-[#fbbf24] font-mono transition-colors">{network.registry}</a>
+            ) : (
+              <span className="text-xs text-[#555566]">Not deployed</span>
+            )}
           </div>
           <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
             <span className="text-xs text-[#6b6b80]">Network</span>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#4ade80] animate-pulse" />
-              <span className="text-xs text-white">BSC Testnet (97)</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${network.registry ? "bg-[#4ade80] animate-pulse" : "bg-[#555566]"}`} />
+              <span className="text-xs text-white">{network.label} ({network.chainId})</span>
             </div>
           </div>
           <div className="flex items-center justify-between py-2">

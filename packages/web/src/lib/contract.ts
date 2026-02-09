@@ -1,4 +1,4 @@
-export const REGISTRY_ADDRESS = ((process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x6F862dA94ED6Af3De8ed90D6853C24E91d705879").trim()) as `0x${string}`;
+export const REGISTRY_ADDRESS = ((process.env.NEXT_PUBLIC_REGISTRY_ADDRESS || "0x5e3Fe22590C61818e13CB3F1f75a809A1b014BC3").trim()) as `0x${string}`;
 
 export const REGISTRY_ABI = [
   {
