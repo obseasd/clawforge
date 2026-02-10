@@ -22,7 +22,7 @@ const NETWORKS: Record<string, { label: string; rpc: string; explorer: string; r
     label: "opBNB",
     rpc: "https://opbnb-mainnet-rpc.bnbchain.org/",
     explorer: "https://opbnbscan.com",
-    registry: "",
+    registry: "0xBFd5542a97E96D8F2E2D1A39E839c7A15bA731E1",
   },
 };
 

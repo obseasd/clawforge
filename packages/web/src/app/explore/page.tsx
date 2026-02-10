@@ -28,7 +28,7 @@ const NETWORKS = [
     chainId: 204,
     rpc: "https://opbnb-mainnet-rpc.bnbchain.org/",
     explorer: "https://opbnbscan.com",
-    registry: "",
+    registry: "0xBFd5542a97E96D8F2E2D1A39E839c7A15bA731E1",
   },
 ];
 
