@@ -20,6 +20,10 @@ Upload .sol / Paste Address  →  Static Analysis (8 detectors)  →  AI Deep Sc
 4. **Review** the consolidated report with safety score (0-100), severity breakdown, and remediation advice
 5. **Publish** the audit on-chain as an ERC-721 NFT on BNB Chain — immutable proof of security assessment
 
+![sc1](https://github.com/user-attachments/assets/fa05dcda-5834-4fe9-a89a-a08c839866ea)![scaudit](https://github.com/user-attachments/assets/86afdeb6-8ea3-45ec-acf1-4e12ef76c98d)
+
+![sc2explore](https://github.com/user-attachments/assets/86aae45e-27aa-434a-8995-1c723c6f0307)
+
 ---
 
 ## Architecture
