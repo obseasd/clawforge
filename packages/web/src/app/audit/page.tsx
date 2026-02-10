@@ -261,9 +261,9 @@ export default function AuditPage() {
         <div className="glass rounded-2xl p-8">
           <p className="text-xs text-[#6b6b80] text-center mb-4 uppercase tracking-wider">Severity Distribution</p>
           {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={78} dataKey="value" paddingAngle={3} strokeWidth={0}
+                <Pie data={chartData} cx="50%" cy="55%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={3} strokeWidth={0}
                   label={({ name, value }) => `${name}: ${value}`}>
                   {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Pie>
