@@ -132,13 +132,90 @@ function detectAccessControl(source: string): Finding[] {
   return findings;
 }
 
+function detectUncheckedCalls(source: string): Finding[] {
+  const findings: Finding[] = [];
+  const lines = source.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/\.call[{(]/.test(line)) {
+      const ctx = lines.slice(Math.max(0, i - 1), i + 2).join(" ");
+      const isChecked = /\(bool\s+\w+/.test(ctx) || /bool\s+\w+.*=.*\.call/.test(ctx) || /require\(/.test(lines[i + 1] || "");
+      if (!isChecked) {
+        findings.push({
+          id: "CF-002", title: "Unchecked Low-Level Call", severity: "high",
+          description: `Low-level call on line ${i + 1} does not check the return value. Failed calls will silently continue execution.`,
+          location: { line: i + 1, column: line.indexOf(".call"), length: 5 },
+          snippet: line.trim(),
+          recommendation: 'Capture and check the return value: (bool success, ) = addr.call{...}(""); require(success);',
+          detector: "static", confidence: "medium"
+        });
+      }
+    }
+  }
+  return findings;
+}
+
+function detectIntegerOverflow(source: string): Finding[] {
+  const findings: Finding[] = [];
+  const lines = source.split("\n");
+  let pragmaVersion = "";
+  for (const line of lines) {
+    const match = line.match(/pragma\s+solidity\s+[\^~>=]*\s*(0\.\d+\.\d+)/);
+    if (match) { pragmaVersion = match[1]; break; }
+  }
+  if (!pragmaVersion) return findings;
+  const minor = parseInt(pragmaVersion.split(".")[1]);
+  if (minor >= 8) return findings;
+  const usesSafeMath = /using\s+SafeMath\s+for/.test(source);
+  if (!usesSafeMath) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/\+\s*=|\-\s*=|\*\s*=/.test(line) || /[^=!<>]\s*[\+\-\*]\s*[^=]/.test(line)) {
+        if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
+        findings.push({
+          id: "CF-006", title: "Potential Integer Overflow/Underflow", severity: "medium",
+          description: `Arithmetic operation on line ${i + 1} in Solidity ${pragmaVersion} without SafeMath.`,
+          location: { line: i + 1, column: 0, length: line.length },
+          snippet: line.trim(),
+          recommendation: "Upgrade to Solidity ^0.8.0 for built-in overflow checks, or use OpenZeppelin SafeMath.",
+          detector: "static", confidence: "medium"
+        });
+        break;
+      }
+    }
+  }
+  return findings;
+}
+
+function detectUninitializedStorage(source: string): Finding[] {
+  const findings: Finding[] = [];
+  const lines = source.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const storageMatch = lines[i].match(/^\s*(\w+(?:\[\])?)\s+storage\s+(\w+)\s*;/);
+    if (storageMatch) {
+      findings.push({
+        id: "CF-008", title: "Uninitialized Storage Pointer", severity: "medium",
+        description: `Storage pointer '${storageMatch[2]}' on line ${i + 1} declared without initialization — may overwrite critical state.`,
+        location: { line: i + 1, column: 0, length: lines[i].length },
+        snippet: lines[i].trim(),
+        recommendation: "Initialize storage pointers by assigning to an existing state variable.",
+        detector: "static", confidence: "medium"
+      });
+    }
+  }
+  return findings;
+}
+
 function runStaticAnalysis(source: string): Finding[] {
   return [
     ...detectReentrancy(source),
+    ...detectUncheckedCalls(source),
     ...detectTxOrigin(source),
-    ...detectSelfdestruct(source),
     ...detectDelegatecall(source),
+    ...detectSelfdestruct(source),
+    ...detectIntegerOverflow(source),
     ...detectAccessControl(source),
+    ...detectUninitializedStorage(source),
   ];
 }
 
@@ -225,9 +302,12 @@ export async function POST(req: NextRequest) {
       return true;
     });
 
+    const contractAddress = (formData.get("contractAddress") as string) || "";
+
     const summary = {
       contractName: file.name.replace(".sol", ""),
       contractHash,
+      contractAddress,
       totalFindings: deduped.length,
       critical: deduped.filter((f) => f.severity === "critical").length,
       high: deduped.filter((f) => f.severity === "high").length,

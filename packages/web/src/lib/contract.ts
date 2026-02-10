@@ -68,4 +68,11 @@ export const REGISTRY_ABI = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [{ name: "contractHash", type: "bytes32" }],
+    name: "getAuditsByContract",
+    outputs: [{ name: "", type: "uint256[]" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const;

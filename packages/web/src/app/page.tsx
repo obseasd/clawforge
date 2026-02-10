@@ -32,6 +32,7 @@ export default function Home() {
   const [addressInput, setAddressInput] = useState("");
   const [network, setNetwork] = useState<"mainnet" | "testnet" | "opbnb">("mainnet");
   const [fetchError, setFetchError] = useState("");
+  const [pendingAddress, setPendingAddress] = useState("");
   const router = useRouter();
 
   const onDrop = useCallback(
@@ -45,6 +46,7 @@ export default function Home() {
 
       const formData = new FormData();
       formData.append("file", file);
+      if (pendingAddress) formData.append("contractAddress", pendingAddress);
 
       setProgress(30);
       setStage("Running static analysis (8 detectors)...");
@@ -67,7 +69,7 @@ export default function Home() {
         setStage("Error during audit");
       }
     },
-    [router]
+    [router, pendingAddress]
   );
 
   const handleAddressAudit = async () => {
@@ -99,6 +101,7 @@ export default function Home() {
       setProgress(15);
       setStage("Contract fetched. Starting audit...");
 
+      setPendingAddress(address);
       const file = new File([data.source], `${data.name}.sol`, { type: "text/plain" });
       onDrop([file]);
     } catch {

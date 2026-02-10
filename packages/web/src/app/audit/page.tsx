@@ -17,7 +17,7 @@ interface Finding {
 }
 
 interface Summary {
-  contractName: string; contractHash: string; totalFindings: number;
+  contractName: string; contractHash: string; contractAddress?: string; totalFindings: number;
   critical: number; high: number; medium: number; low: number; info: number;
   overallScore: number; reportHash: string;
 }
@@ -164,7 +164,8 @@ export default function AuditPage() {
       const { signer } = await connectWallet();
       setWallet(await signer.getAddress());
       const c = new ethers.Contract(REGISTRY_ADDRESS, SUBMIT_ABI, signer);
-      const tx = await c.submitAudit(s.contractHash, ethers.ZeroAddress, s.critical, s.high, s.medium, s.low, s.info, s.overallScore, s.reportHash, "", 56);
+      const auditedAddr = s.contractAddress && /^0x[a-fA-F0-9]{40}$/.test(s.contractAddress) ? s.contractAddress : ethers.ZeroAddress;
+      const tx = await c.submitAudit(s.contractHash, auditedAddr, s.critical, s.high, s.medium, s.low, s.info, s.overallScore, s.reportHash, s.contractName, 56);
       const receipt = await tx.wait();
       setTxHash(receipt.hash);
     } catch (e: unknown) { showToast(e instanceof Error ? e.message : String(e), "error"); }

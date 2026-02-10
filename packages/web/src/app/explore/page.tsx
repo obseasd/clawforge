@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { useRouter } from "next/navigation";
 import { REGISTRY_ABI } from "@/lib/contract";
 
 const NETWORKS = [
@@ -34,6 +35,8 @@ const NETWORKS = [
 interface OnChainAudit {
   tokenId: number;
   contractHash: string;
+  auditedContract: string;
+  reportURI: string;
   auditor: string;
   score: number;
   critical: number;
@@ -45,11 +48,16 @@ interface OnChainAudit {
   chainId: number;
 }
 
+const VISIBLE_LIMIT = 5;
+
 export default function ExplorePage() {
   const [networkId, setNetworkId] = useState("bsc");
   const [stats, setStats] = useState({ audits: "--", critical: "--", high: "--" });
   const [audits, setAudits] = useState<OnChainAudit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const router = useRouter();
 
   const network = NETWORKS.find((n) => n.id === networkId)!;
 
@@ -57,6 +65,8 @@ export default function ExplorePage() {
     setStats({ audits: "--", critical: "--", high: "--" });
     setAudits([]);
     setLoading(true);
+    setSearch("");
+    setShowAll(false);
 
     if (!network.registry) {
       setStats({ audits: "0", critical: "0", high: "0" });
@@ -77,13 +87,20 @@ export default function ExplorePage() {
         ]);
         setStats({ audits: countNum.toString(), critical: c.toString(), high: h.toString() });
 
-        const start = Math.max(1, countNum - 19);
+        const start = Math.max(1, countNum - 49);
         const fetches = [];
         for (let i = countNum; i >= start; i--) {
           fetches.push(
-            contract.getAudit(i).then((a: { contractHash: string; auditor: string; overallScore: number; criticalCount: number; highCount: number; mediumCount: number; lowCount: number; infoCount: number; timestamp: bigint; chainId: bigint }) => ({
+            contract.getAudit(i).then((a: {
+              contractHash: string; auditedContract: string; overallScore: number;
+              criticalCount: number; highCount: number; mediumCount: number;
+              lowCount: number; infoCount: number; timestamp: bigint; chainId: bigint;
+              reportURI: string; auditor: string;
+            }) => ({
               tokenId: i,
               contractHash: a.contractHash,
+              auditedContract: a.auditedContract,
+              reportURI: a.reportURI,
               auditor: a.auditor,
               score: Number(a.overallScore),
               critical: Number(a.criticalCount),
@@ -105,25 +122,37 @@ export default function ExplorePage() {
     load();
   }, [networkId, network]);
 
+  // Derive display name for an audit
+  const auditName = (a: OnChainAudit) => {
+    if (a.reportURI) return a.reportURI;
+    if (a.auditedContract && a.auditedContract !== ethers.ZeroAddress)
+      return `${a.auditedContract.substring(0, 6)}...${a.auditedContract.substring(38)}`;
+    return `${a.contractHash.substring(0, 10)}...${a.contractHash.substring(62)}`;
+  };
+
+  // Filter by search
+  const filtered = search.trim()
+    ? audits.filter((a) => {
+        const q = search.toLowerCase();
+        return (
+          a.reportURI.toLowerCase().includes(q) ||
+          a.auditedContract.toLowerCase().includes(q) ||
+          a.contractHash.toLowerCase().includes(q) ||
+          a.auditor.toLowerCase().includes(q)
+        );
+      })
+    : audits;
+
+  const displayed = showAll || search.trim() ? filtered : filtered.slice(0, VISIBLE_LIMIT);
+  const hasMore = !showAll && !search.trim() && filtered.length > VISIBLE_LIMIT;
+
   const statCards = [
-    {
-      label: "Total Audits",
-      value: stats.audits,
-      color: "#f5a623",
-      icon: <><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>,
-    },
-    {
-      label: "Critical Findings",
-      value: stats.critical,
-      color: "#f87171",
-      icon: <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></>,
-    },
-    {
-      label: "High Findings",
-      value: stats.high,
-      color: "#fb923c",
-      icon: <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
-    },
+    { label: "Total Audits", value: stats.audits, color: "#f5a623",
+      icon: <><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></> },
+    { label: "Critical Findings", value: stats.critical, color: "#f87171",
+      icon: <><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></> },
+    { label: "High Findings", value: stats.high, color: "#fb923c",
+      icon: <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></> },
   ];
 
   const scoreColor = (score: number) => score >= 80 ? "#4ade80" : score >= 60 ? "#facc15" : "#f87171";
@@ -138,17 +167,10 @@ export default function ExplorePage() {
         {/* Network Selector */}
         <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
           {NETWORKS.map((n) => (
-            <button
-              key={n.id}
-              onClick={() => setNetworkId(n.id)}
+            <button key={n.id} onClick={() => setNetworkId(n.id)}
               className={`px-4 py-2 text-xs font-medium rounded-xl transition-all ${
-                networkId === n.id
-                  ? "bg-[#f5a623]/15 text-[#f5a623]"
-                  : "text-[#6b6b80] hover:text-white"
-              }`}
-            >
-              {n.label}
-            </button>
+                networkId === n.id ? "bg-[#f5a623]/15 text-[#f5a623]" : "text-[#6b6b80] hover:text-white"
+              }`}>{n.label}</button>
           ))}
         </div>
       </div>
@@ -169,11 +191,32 @@ export default function ExplorePage() {
         ))}
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#555566]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by contract name, address, or hash..."
+          className="w-full pl-11 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl text-sm text-white placeholder-[#444455] focus:border-[#f5a623]/40 focus:outline-none transition-colors"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#555566] hover:text-white">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+        )}
+      </div>
+
       {/* Audit History */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-white">Audit History</h2>
-          <span className="text-xs text-[#555566]">{audits.length > 0 ? `${audits.length} records` : ""}</span>
+          <span className="text-xs text-[#555566]">
+            {search.trim() ? `${filtered.length} result${filtered.length !== 1 ? "s" : ""}` : audits.length > 0 ? `${audits.length} records` : ""}
+          </span>
         </div>
 
         {loading ? (
@@ -186,13 +229,12 @@ export default function ExplorePage() {
             </div>
             <p className="text-xs text-[#6b6b80]">Loading on-chain data...</p>
           </div>
-        ) : audits.length > 0 ? (
+        ) : displayed.length > 0 ? (
           <div className="space-y-2">
-            {audits.map((a) => (
-              <a key={a.tokenId}
-                href={`${network.explorer}/token/${network.registry}?a=${a.tokenId}`}
-                target="_blank" rel="noopener noreferrer"
-                className="glass glass-hover rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group block">
+            {displayed.map((a) => (
+              <button key={a.tokenId}
+                onClick={() => router.push(`/explore/audit?network=${networkId}&tokenId=${a.tokenId}`)}
+                className="glass glass-hover rounded-2xl p-4 flex items-center justify-between gap-4 transition-all group w-full text-left">
                 <div className="flex items-center gap-4 min-w-0">
                   {/* Score circle */}
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
@@ -201,10 +243,16 @@ export default function ExplorePage() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-white">NFT #{a.tokenId}</span>
-                      <span className="text-[10px] text-[#555566] font-mono truncate">{a.contractHash.substring(0, 18)}...</span>
+                      <span className="text-xs font-medium text-white truncate">{auditName(a)}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#555566] shrink-0">#{a.tokenId}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-1">
+                      {a.auditedContract && a.auditedContract !== ethers.ZeroAddress && (
+                        <>
+                          <span className="text-[10px] text-[#f5a623] font-mono">{a.auditedContract.substring(0, 6)}...{a.auditedContract.substring(38)}</span>
+                          <span className="w-1 h-1 rounded-full bg-[#333344]" />
+                        </>
+                      )}
                       <span className="text-[10px] text-[#6b6b80]">by {a.auditor.substring(0, 6)}...{a.auditor.substring(38)}</span>
                       <span className="w-1 h-1 rounded-full bg-[#333344]" />
                       <span className="text-[10px] text-[#6b6b80]">{new Date(a.timestamp * 1000).toLocaleDateString()}</span>
@@ -220,8 +268,15 @@ export default function ExplorePage() {
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-              </a>
+              </button>
             ))}
+
+            {hasMore && (
+              <button onClick={() => setShowAll(true)}
+                className="w-full py-3 text-xs font-medium text-[#6b6b80] hover:text-[#f5a623] transition-colors">
+                Show all {filtered.length} audits
+              </button>
+            )}
           </div>
         ) : (
           <div className="glass rounded-2xl p-8 text-center">
@@ -232,10 +287,10 @@ export default function ExplorePage() {
               </svg>
             </div>
             <p className="text-sm text-[#6b6b80] mb-1">
-              {!network.registry ? "No registry deployed on this network yet" : "No audits published yet"}
+              {search.trim() ? "No audits match your search" : !network.registry ? "No registry deployed on this network yet" : "No audits published yet"}
             </p>
             <p className="text-xs text-[#555566]">
-              {!network.registry ? "Coming soon!" : "Be the first to publish an audit on-chain!"}
+              {search.trim() ? "Try a different search term" : !network.registry ? "Coming soon!" : "Be the first to publish an audit on-chain!"}
             </p>
           </div>
         )}
@@ -272,30 +327,6 @@ export default function ExplorePage() {
             <span className="text-xs text-[#6b6b80]">Standard</span>
             <span className="text-xs text-white">ERC-721 (CFAR)</span>
           </div>
-        </div>
-      </div>
-
-      {/* How It Works */}
-      <div>
-        <p className="text-xs text-[#555566] text-center mb-4 uppercase tracking-wider">How It Works</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { num: "01", title: "Upload", desc: "Drop .sol or paste address", icon: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></> },
-            { num: "02", title: "Analyze", desc: "8 detectors + Claude AI", icon: <><circle cx="12" cy="12" r="3" /><path d="M12 2v2m0 16v2m-7.07-3.93l1.41-1.41m9.9-9.9l1.41-1.41M2 12h2m16 0h2m-3.93 7.07l-1.41-1.41M7.05 7.05L5.64 5.64" /></> },
-            { num: "03", title: "Review", desc: "Score, chart, PDF export", icon: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></> },
-            { num: "04", title: "Mint NFT", desc: "On-chain proof of audit", icon: <><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></> },
-          ].map((step) => (
-            <div key={step.num} className="glass glass-hover rounded-2xl p-5 text-center group transition-all">
-              <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-[#f5a623]/10 flex items-center justify-center group-hover:bg-[#f5a623]/15 transition-colors">
-                <svg className="w-5 h-5 text-[#f5a623]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  {step.icon}
-                </svg>
-              </div>
-              <span className="text-[10px] text-[#f5a623] font-mono">{step.num}</span>
-              <h3 className="text-sm font-medium text-white mt-1">{step.title}</h3>
-              <p className="text-[11px] text-[#6b6b80] mt-1">{step.desc}</p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
