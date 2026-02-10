@@ -35,11 +35,11 @@ const config: HardhatUserConfig = {
     apiKey: BSCSCAN_API_KEY,
     customChains: [
       {
-        network: "bscTestnet",
-        chainId: 97,
+        network: "opbnb",
+        chainId: 204,
         urls: {
-          apiURL: "https://api-testnet.bscscan.com/api",
-          browserURL: "https://testnet.bscscan.com",
+          apiURL: "https://api-opbnb.bscscan.com/api",
+          browserURL: "https://opbnbscan.com",
         },
       },
     ],
