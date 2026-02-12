@@ -34,16 +34,34 @@ const FEATURED_PROTOCOLS = [
     tag: "DEX",
   },
   {
+    name: "PancakeSwap V3 SwapRouter",
+    address: "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
+    desc: "Concentrated liquidity V3 router",
+    tag: "DEX V3",
+  },
+  {
+    name: "PancakeSwap SmartRouter",
+    address: "0x13f4EA83D0bd40E75C8222255bc855a974568Dd4",
+    desc: "Multi-pool optimal routing",
+    tag: "DEX V3",
+  },
+  {
+    name: "PancakeSwap V3 NFT Manager",
+    address: "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364",
+    desc: "V3 LP position NFTs (ERC-721)",
+    tag: "NFT",
+  },
+  {
+    name: "PancakeSwap MasterChefV3",
+    address: "0x556B9306565093C855AEA9AE92A594704c2Cd59e",
+    desc: "CAKE farming & staking rewards",
+    tag: "Staking",
+  },
+  {
     name: "Venus vBNB Token",
     address: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
     desc: "Top lending protocol on BSC",
     tag: "Lending",
-  },
-  {
-    name: "Biswap Router",
-    address: "0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8",
-    desc: "Multi-type DEX with referral system",
-    tag: "DEX",
   },
 ];
 

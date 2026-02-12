@@ -196,8 +196,13 @@ function detectIntegerOverflow(source: string): Finding[] {
   if (!usesSafeMath) {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      // Skip non-code lines
+      if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
+      if (/^\s*(import|pragma|\/\/)/.test(line)) continue;
+      if (/^\s*$/.test(line)) continue;
+      // Skip string literals, event/error declarations
+      if (/^\s*(event|error|struct|enum)\b/.test(line)) continue;
       if (/\+\s*=|\-\s*=|\*\s*=/.test(line) || /[^=!<>]\s*[\+\-\*]\s*[^=]/.test(line)) {
-        if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
         findings.push({
           id: "CF-006", title: "Potential Integer Overflow/Underflow", severity: "medium",
           description: `Arithmetic operation on line ${i + 1} in Solidity ${pragmaVersion} without SafeMath.`,

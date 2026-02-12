@@ -31,9 +31,12 @@ export const integerOverflowDetector: Detector = {
       // Find arithmetic operations
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
+        // Skip non-code lines
+        if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
+        if (/^\s*(import|pragma)/.test(line)) continue;
+        if (/^\s*$/.test(line)) continue;
+        if (/^\s*(event|error|struct|enum)\b/.test(line)) continue;
         if (/\+\s*=|\-\s*=|\*\s*=/.test(line) || /[^=!<>]\s*[\+\-\*]\s*[^=]/.test(line)) {
-          // Skip comments and strings
-          if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
 
           findings.push({
             id: "CF-006",
