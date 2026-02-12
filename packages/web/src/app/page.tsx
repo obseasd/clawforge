@@ -26,27 +26,24 @@ const DETECTORS = [
   "Precision Loss",
 ];
 
-const FEATURED_AUDITS = [
+const FEATURED_PROTOCOLS = [
   {
     name: "PancakeSwap Router v2",
     address: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
-    score: 85,
-    findings: { critical: 0, high: 0, medium: 2, low: 3 },
     desc: "BSC's largest DEX — 16.2M TX",
+    tag: "DEX",
   },
   {
     name: "Venus vBNB Token",
     address: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-    score: 78,
-    findings: { critical: 0, high: 1, medium: 2, low: 1 },
     desc: "Top lending protocol on BSC",
+    tag: "Lending",
   },
   {
     name: "Biswap Router",
     address: "0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8",
-    score: 82,
-    findings: { critical: 0, high: 0, medium: 1, low: 4 },
     desc: "Multi-type DEX with referral system",
+    tag: "DEX",
   },
 ];
 
@@ -380,41 +377,37 @@ export default function Home() {
         </section>
       )}
 
-      {/* Featured Audits — Real BSC Protocols */}
+      {/* Featured BSC Protocols — Click to Audit */}
       {!isAuditing && (
         <section className="w-full max-w-3xl mt-16 mb-4">
-          <h2 className="text-sm font-semibold text-white text-center mb-1">Audited on BNB Chain</h2>
-          <p className="text-xs text-[#555566] text-center mb-5">Real protocols analyzed by ClawForge</p>
+          <h2 className="text-sm font-semibold text-white text-center mb-1">Try on Real BSC Protocols</h2>
+          <p className="text-xs text-[#555566] text-center mb-5">Click to audit verified contracts on BNB Chain</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {FEATURED_AUDITS.map((audit) => {
-              const scoreColor = audit.score >= 80 ? "#4ade80" : audit.score >= 60 ? "#facc15" : "#f87171";
-              return (
-                <button
-                  key={audit.address}
-                  onClick={() => {
-                    setTab("address");
-                    setAddressInput(audit.address);
-                    setNetwork("mainnet");
-                  }}
-                  className="glass glass-hover rounded-2xl p-4 text-left group transition-all"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-white truncate pr-2">{audit.name}</span>
-                    <span className="text-sm font-bold shrink-0" style={{ color: scoreColor }}>{audit.score}</span>
-                  </div>
-                  <p className="text-[10px] text-[#555566] mb-2">{audit.desc}</p>
-                  <div className="flex items-center gap-1.5">
-                    {audit.findings.critical > 0 && <span className="pill pill-critical text-[9px] !px-1.5 !py-0.5">{audit.findings.critical}C</span>}
-                    {audit.findings.high > 0 && <span className="pill pill-high text-[9px] !px-1.5 !py-0.5">{audit.findings.high}H</span>}
-                    {audit.findings.medium > 0 && <span className="pill pill-medium text-[9px] !px-1.5 !py-0.5">{audit.findings.medium}M</span>}
-                    {audit.findings.low > 0 && <span className="pill pill-low text-[9px] !px-1.5 !py-0.5">{audit.findings.low}L</span>}
-                  </div>
-                  <p className="text-[9px] text-[#f5a623]/50 font-mono mt-2 truncate group-hover:text-[#f5a623]/80 transition-colors">
-                    {audit.address}
+            {FEATURED_PROTOCOLS.map((protocol) => (
+              <button
+                key={protocol.address}
+                onClick={() => {
+                  setTab("address");
+                  setAddressInput(protocol.address);
+                  setNetwork("mainnet");
+                }}
+                className="glass glass-hover rounded-2xl p-4 text-left group transition-all"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-white truncate pr-2">{protocol.name}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f5a623]/10 text-[#f5a623] font-medium shrink-0">{protocol.tag}</span>
+                </div>
+                <p className="text-[10px] text-[#555566] mb-3">{protocol.desc}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] text-[#f5a623]/40 font-mono truncate group-hover:text-[#f5a623]/70 transition-colors">
+                    {protocol.address}
                   </p>
-                </button>
-              );
-            })}
+                  <svg className="w-3.5 h-3.5 text-[#555566] group-hover:text-[#f5a623] transition-colors shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </div>
+              </button>
+            ))}
           </div>
         </section>
       )}
