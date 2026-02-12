@@ -206,6 +206,107 @@ function detectUninitializedStorage(source: string): Finding[] {
   return findings;
 }
 
+function detectStorageCollision(source: string): Finding[] {
+  const findings: Finding[] = [];
+  const lines = source.split("\n");
+  let hasProxy = false;
+  let hasDelegatecall = false;
+  const storageVarLines: number[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/\b(delegatecall|Proxy|ERC1967|TransparentUpgradeable|UUPSUpgradeable)\b/.test(line)) hasProxy = true;
+    if (/\.delegatecall\(/.test(line)) hasDelegatecall = true;
+    // State variable declarations (not inside functions)
+    if (/^\s*(uint|int|bool|address|bytes|string|mapping|struct)\b/.test(line) && !/function|event|error|modifier/.test(line)) {
+      storageVarLines.push(i);
+    }
+  }
+
+  if ((hasProxy || hasDelegatecall) && storageVarLines.length > 0) {
+    // Check for storage gaps
+    const hasStorageGap = /uint256\[\d+\]\s+(private\s+)?__gap/.test(source) || /__storage_gap/.test(source);
+    if (!hasStorageGap) {
+      findings.push({
+        id: "CF-009", title: "Upgradeable Contract Without Storage Gap", severity: "high",
+        description: "This contract uses proxy/upgradeable patterns but lacks a __gap storage variable. Adding new state variables in upgrades will corrupt storage layout of derived contracts.",
+        location: { line: storageVarLines[0] + 1, column: 0, length: lines[storageVarLines[0]].length },
+        snippet: lines[storageVarLines[0]].trim(),
+        recommendation: "Add 'uint256[50] private __gap;' at the end of the contract to reserve storage slots for future upgrades.",
+        detector: "static", confidence: "high"
+      });
+    }
+
+    // Check for inherited storage order issues in contracts with delegatecall
+    if (hasDelegatecall) {
+      const inheritanceMatch = source.match(/contract\s+\w+\s+is\s+([^{]+)/);
+      if (inheritanceMatch) {
+        const parents = inheritanceMatch[1].split(",").map(s => s.trim());
+        if (parents.length > 2) {
+          findings.push({
+            id: "CF-009b", title: "Complex Inheritance with Delegatecall", severity: "medium",
+            description: `Contract inherits from ${parents.length} parents and uses delegatecall. Complex inheritance chains increase storage collision risk during upgrades.`,
+            location: { line: 1, column: 0, length: lines[0].length },
+            snippet: `is ${parents.join(", ")}`,
+            recommendation: "Use a flat inheritance hierarchy for proxy implementations. Consider using ERC-7201 namespaced storage.",
+            detector: "static", confidence: "medium"
+          });
+        }
+      }
+    }
+  }
+
+  return findings;
+}
+
+function detectPrecisionLoss(source: string): Finding[] {
+  const findings: Finding[] = [];
+  const lines = source.split("\n");
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Skip comments
+    if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
+
+    // Detect division before multiplication: (a / b) * c or a / b * c
+    const divBeforeMul = line.match(/(\w+)\s*\/\s*(\w+)\s*\*\s*(\w+)/);
+    if (divBeforeMul) {
+      findings.push({
+        id: "CF-010", title: "Precision Loss: Division Before Multiplication", severity: "medium",
+        description: `On line ${i + 1}, division is performed before multiplication ('${divBeforeMul[0]}'). In Solidity, integer division truncates — this causes permanent precision loss.`,
+        location: { line: i + 1, column: line.indexOf(divBeforeMul[0]), length: divBeforeMul[0].length },
+        snippet: line.trim(),
+        recommendation: "Reorder to multiply before dividing: (a * c) / b. Use higher precision intermediates (multiply by 1e18 first).",
+        detector: "static", confidence: "high"
+      });
+    }
+
+    // Detect division that may lose precision in important calculations (fees, rewards, shares)
+    if (/\b(fee|reward|share|rate|ratio|price|amount)\w*\s*=\s*[^;]*\//.test(line) && !/\*\s*1e\d+|\*\s*10\*\*/.test(line)) {
+      // Check if there's a preceding multiplication for scaling
+      const ctx = lines.slice(Math.max(0, i - 1), i + 1).join(" ");
+      if (!/\*\s*1e\d+|\*\s*10\*\*|\*\s*PRECISION|\*\s*WAD|\*\s*RAY/.test(ctx)) {
+        findings.push({
+          id: "CF-010b", title: "Potential Precision Loss in Financial Calculation", severity: "low",
+          description: `Line ${i + 1} computes a financial value (fee/reward/share) using division without scaling. Small amounts may round to zero.`,
+          location: { line: i + 1, column: 0, length: line.length },
+          snippet: line.trim(),
+          recommendation: "Scale up by a precision factor (e.g., 1e18) before dividing to preserve precision for small values.",
+          detector: "static", confidence: "medium"
+        });
+      }
+    }
+  }
+
+  // Deduplicate findings on the same line
+  const seen = new Set<number>();
+  return findings.filter(f => {
+    if (seen.has(f.location.line)) return false;
+    seen.add(f.location.line);
+    return true;
+  });
+}
+
 function runStaticAnalysis(source: string): Finding[] {
   return [
     ...detectReentrancy(source),
@@ -216,6 +317,8 @@ function runStaticAnalysis(source: string): Finding[] {
     ...detectIntegerOverflow(source),
     ...detectAccessControl(source),
     ...detectUninitializedStorage(source),
+    ...detectStorageCollision(source),
+    ...detectPrecisionLoss(source),
   ];
 }
 

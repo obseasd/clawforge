@@ -45,7 +45,7 @@ export const auditCommand = new Command("audit")
 
     // Phase 1: Static Analysis
     if (!options.aiOnly) {
-      logger.phase("Phase 1 — Static Analysis (8 detectors)");
+      logger.phase("Phase 1 — Static Analysis (10 detectors)");
       const staticFindings = runStaticAnalysis(source, filePath);
       allFindings.push(...staticFindings);
       logger.result(`Found ${staticFindings.length} issue(s) via static analysis`);

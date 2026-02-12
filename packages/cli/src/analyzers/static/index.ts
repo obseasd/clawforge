@@ -7,6 +7,8 @@ import { selfdestructDetector } from "./detectors/selfdestruct";
 import { integerOverflowDetector } from "./detectors/integer-overflow";
 import { accessControlDetector } from "./detectors/access-control";
 import { uninitializedStorageDetector } from "./detectors/uninitialized-storage";
+import { storageCollisionDetector } from "./detectors/storage-collision";
+import { precisionLossDetector } from "./detectors/precision-loss";
 
 const detectors: Detector[] = [
   reentrancyDetector,
@@ -17,6 +19,8 @@ const detectors: Detector[] = [
   integerOverflowDetector,
   accessControlDetector,
   uninitializedStorageDetector,
+  storageCollisionDetector,
+  precisionLossDetector,
 ];
 
 export function runStaticAnalysis(source: string, fileName: string): Finding[] {
