@@ -111,13 +111,39 @@ function detectDelegatecall(source: string): Finding[] {
 function detectAccessControl(source: string): Finding[] {
   const findings: Finding[] = [];
   const lines = source.split("\n");
-  const sensitivePattern = /function\s+(mint|burn|pause|unpause|set\w+|update\w+|withdraw|destroy|kill|upgrade)\s*\(/;
+  const sensitivePattern = /function\s+(pause|unpause|set\w+|update\w+|destroy|kill|upgrade)\s*\(/;
+
+  // Detect if we're inside an interface block (no implementations, just signatures)
+  let inInterface = false;
+  const interfaceRanges: [number, number][] = [];
+  let braceDepth = 0;
+  let interfaceStart = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*interface\s+/.test(lines[i])) { inInterface = true; interfaceStart = i; braceDepth = 0; }
+    if (inInterface) {
+      braceDepth += (lines[i].match(/{/g) || []).length - (lines[i].match(/}/g) || []).length;
+      if (braceDepth <= 0 && i > interfaceStart && lines[i].includes("}")) {
+        interfaceRanges.push([interfaceStart, i]);
+        inInterface = false;
+      }
+    }
+  }
+  const isInInterface = (line: number) => interfaceRanges.some(([s, e]) => line >= s && line <= e);
 
   for (let i = 0; i < lines.length; i++) {
     if (sensitivePattern.test(lines[i])) {
+      // Skip interface declarations (function signatures ending with ;)
+      if (isInInterface(i)) continue;
+      if (/;\s*$/.test(lines[i].trim()) && !/\{/.test(lines[i])) continue;
+
       const ctx = lines.slice(i, Math.min(i + 4, lines.length)).join(" ");
       if (!/\b(public|external)\b/.test(ctx)) continue;
-      if (/onlyOwner|onlyRole|onlyAdmin|nonReentrant|require\s*\(\s*msg\.sender\s*==|hasRole/.test(ctx)) continue;
+      if (/onlyOwner|onlyRole|onlyAdmin|nonReentrant|require\s*\(\s*msg\.sender\s*==|hasRole|_checkOwner|_checkRole/.test(ctx)) continue;
+
+      // Skip if the function body has a require/if checking msg.sender
+      const bodyCtx = lines.slice(i, Math.min(i + 8, lines.length)).join(" ");
+      if (/require\s*\([^)]*msg\.sender/.test(bodyCtx) || /if\s*\(\s*msg\.sender/.test(bodyCtx)) continue;
+
       const fn = lines[i].match(/function\s+(\w+)/)?.[1] || "unknown";
       findings.push({
         id: "CF-007", title: `Missing Access Control on ${fn}()`, severity: "medium",
@@ -262,15 +288,17 @@ function detectStorageCollision(source: string): Finding[] {
 function detectPrecisionLoss(source: string): Finding[] {
   const findings: Finding[] = [];
   const lines = source.split("\n");
+  const usesSafeMath = /using\s+SafeMath\s+for/.test(source);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // Skip comments
     if (/^\s*\/\//.test(line) || /^\s*\*/.test(line)) continue;
 
-    // Detect division before multiplication: (a / b) * c or a / b * c
+    // Detect division before multiplication: a / b * c
+    // But skip if SafeMath .mul() or .div() is used (already handled correctly)
     const divBeforeMul = line.match(/(\w+)\s*\/\s*(\w+)\s*\*\s*(\w+)/);
-    if (divBeforeMul) {
+    if (divBeforeMul && !usesSafeMath && !/\.mul\(|\.div\(/.test(line)) {
       findings.push({
         id: "CF-010", title: "Precision Loss: Division Before Multiplication", severity: "medium",
         description: `On line ${i + 1}, division is performed before multiplication ('${divBeforeMul[0]}'). In Solidity, integer division truncates — this causes permanent precision loss.`,
@@ -281,20 +309,25 @@ function detectPrecisionLoss(source: string): Finding[] {
       });
     }
 
-    // Detect division that may lose precision in important calculations (fees, rewards, shares)
-    if (/\b(fee|reward|share|rate|ratio|price|amount)\w*\s*=\s*[^;]*\//.test(line) && !/\*\s*1e\d+|\*\s*10\*\*/.test(line)) {
-      // Check if there's a preceding multiplication for scaling
+    // Detect division that may lose precision in financial calculations
+    // Skip when: SafeMath .mul() is used before /, or scaling constants present
+    if (/\b(fee|reward|share|rate|ratio|price|amount)\w*\s*=\s*[^;]*\//.test(line)) {
+      // Skip if multiplication already precedes division on this line (correct pattern)
+      if (/\.mul\([^)]*\)\s*\/|\.mul\([^)]*\)\s*\.div\(/.test(line)) continue;
+      if (/\*[^/]*\//.test(line)) continue; // raw a * b / c is fine
+      if (/\*\s*1e\d+|\*\s*10\*\*/.test(line)) continue;
+
       const ctx = lines.slice(Math.max(0, i - 1), i + 1).join(" ");
-      if (!/\*\s*1e\d+|\*\s*10\*\*|\*\s*PRECISION|\*\s*WAD|\*\s*RAY/.test(ctx)) {
-        findings.push({
-          id: "CF-010b", title: "Potential Precision Loss in Financial Calculation", severity: "low",
-          description: `Line ${i + 1} computes a financial value (fee/reward/share) using division without scaling. Small amounts may round to zero.`,
-          location: { line: i + 1, column: 0, length: line.length },
-          snippet: line.trim(),
-          recommendation: "Scale up by a precision factor (e.g., 1e18) before dividing to preserve precision for small values.",
-          detector: "static", confidence: "medium"
-        });
-      }
+      if (/\*\s*1e\d+|\*\s*10\*\*|\*\s*PRECISION|\*\s*WAD|\*\s*RAY|\.mul\(/.test(ctx)) continue;
+
+      findings.push({
+        id: "CF-010b", title: "Potential Precision Loss in Financial Calculation", severity: "low",
+        description: `Line ${i + 1} computes a financial value (fee/reward/share) using division without scaling. Small amounts may round to zero.`,
+        location: { line: i + 1, column: 0, length: line.length },
+        snippet: line.trim(),
+        recommendation: "Scale up by a precision factor (e.g., 1e18) before dividing to preserve precision for small values.",
+        detector: "static", confidence: "medium"
+      });
     }
   }
 
