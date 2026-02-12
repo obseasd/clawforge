@@ -363,15 +363,17 @@ function runStaticAnalysis(source: string): Finding[] {
 function calculateScore(findings: Finding[]): number {
   let score = 100;
   for (const f of findings) {
+    // AI findings get half penalty — static detectors are more reliable
+    const weight = f.detector === "ai" ? 0.5 : 1;
     switch (f.severity) {
-      case "critical": score -= 25; break;
-      case "high": score -= 15; break;
-      case "medium": score -= 8; break;
-      case "low": score -= 3; break;
-      case "info": score -= 1; break;
+      case "critical": score -= 25 * weight; break;
+      case "high": score -= 15 * weight; break;
+      case "medium": score -= 8 * weight; break;
+      case "low": score -= 3 * weight; break;
+      case "info": score -= 1 * weight; break;
     }
   }
-  return Math.max(0, Math.min(100, score));
+  return Math.max(0, Math.min(100, Math.round(score)));
 }
 
 export async function POST(req: NextRequest) {
@@ -401,7 +403,15 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: "claude-sonnet-4-5-20250929",
             max_tokens: 2048,
-            system: "You are a smart contract security auditor. Analyze the contract and return ONLY valid JSON. Each finding MUST have: title, severity (critical/high/medium/low/info), description, recommendation (actionable fix), snippet (relevant code). Be concise and precise.",
+            system: `You are an expert smart contract security auditor. Analyze the contract and return ONLY valid JSON.
+
+CRITICAL RULES:
+- If the code is an interface or abstract contract with NO implementation logic, return very few findings (0-2 max, info/low only). Interfaces CANNOT have vulnerabilities — do not flag missing validation, access control, or reentrancy on interfaces.
+- Only flag REAL exploitable vulnerabilities in actual implementation code. Do not flag design trade-offs, theoretical concerns, or best-practice suggestions as medium/high.
+- severity "critical" = funds can be stolen now. "high" = funds at serious risk. "medium" = conditional exploit. "low" = minor issue. "info" = informational only.
+- Well-known audited production contracts (PancakeSwap, Uniswap, Venus, OpenZeppelin) should score 75-95. Do NOT give them low scores for theoretical issues.
+- Each finding MUST have: title, severity, description, recommendation (actionable fix), snippet (relevant code line).
+- Return 3-8 findings max. Quality over quantity.`,
             messages: [{ role: "user", content: `Audit this Solidity contract:\n\n${source}\n\nReturn JSON: { "findings": [{ "title": "...", "severity": "...", "description": "...", "recommendation": "...", "snippet": "..." }], "summary": "...", "score": N }` }],
           }),
         });
