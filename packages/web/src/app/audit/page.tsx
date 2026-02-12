@@ -330,12 +330,14 @@ export default function AuditPage() {
                 </code>
               </pre>
             )}
-            <div className="flex items-start gap-2 bg-[#4ade80]/[0.04] rounded-xl p-3">
-              <svg className="w-3.5 h-3.5 text-[#4ade80] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <p className="text-xs text-[#4ade80]/80 leading-relaxed">{f.recommendation}</p>
-            </div>
+            {f.recommendation && (
+              <div className="flex items-start gap-2 bg-[#4ade80]/[0.04] rounded-xl p-3">
+                <svg className="w-3.5 h-3.5 text-[#4ade80] mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <p className="text-xs text-[#4ade80]/80 leading-relaxed">{f.recommendation}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>

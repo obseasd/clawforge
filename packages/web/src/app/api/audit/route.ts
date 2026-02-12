@@ -401,8 +401,8 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: "claude-sonnet-4-5-20250929",
             max_tokens: 2048,
-            system: "You are a smart contract security auditor. Analyze the contract and return JSON with findings array and summary string. Be concise.",
-            messages: [{ role: "user", content: `Audit this Solidity contract:\n\n${source}\n\nReturn JSON: { "findings": [...], "summary": "...", "score": N }` }],
+            system: "You are a smart contract security auditor. Analyze the contract and return ONLY valid JSON. Each finding MUST have: title, severity (critical/high/medium/low/info), description, recommendation (actionable fix), snippet (relevant code). Be concise and precise.",
+            messages: [{ role: "user", content: `Audit this Solidity contract:\n\n${source}\n\nReturn JSON: { "findings": [{ "title": "...", "severity": "...", "description": "...", "recommendation": "...", "snippet": "..." }], "summary": "...", "score": N }` }],
           }),
         });
         if (res.ok) {
@@ -421,7 +421,7 @@ export async function POST(req: NextRequest) {
                     description: (f.description as string) || "",
                     location: { line: (f.line as number) || 0, column: 0, length: 0 },
                     snippet: (f.snippet as string) || "",
-                    recommendation: (f.recommendation as string) || "",
+                    recommendation: (f.recommendation as string) || (f.fix as string) || (f.remediation as string) || (f.suggestion as string) || "",
                     detector: "ai",
                     confidence: (f.confidence as string) || "medium",
                   });

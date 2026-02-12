@@ -28,12 +28,6 @@ const DETECTORS = [
 
 const FEATURED_PROTOCOLS = [
   {
-    name: "PancakeSwap Router v2",
-    address: "0x10ED43C718714eb63d5aA57B78B54704E256024E",
-    desc: "BSC's largest DEX — 16.2M TX",
-    tag: "DEX",
-  },
-  {
     name: "PancakeSwap V3 SwapRouter",
     address: "0x1b81D678ffb9C0263b24A97847620C99d213eB14",
     desc: "Concentrated liquidity V3 router",
@@ -44,18 +38,6 @@ const FEATURED_PROTOCOLS = [
     address: "0x13f4EA83D0bd40E75C8222255bc855a974568Dd4",
     desc: "Multi-pool optimal routing",
     tag: "DEX V3",
-  },
-  {
-    name: "PancakeSwap V3 NFT Manager",
-    address: "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364",
-    desc: "V3 LP position NFTs (ERC-721)",
-    tag: "NFT",
-  },
-  {
-    name: "PancakeSwap MasterChefV3",
-    address: "0x556B9306565093C855AEA9AE92A594704c2Cd59e",
-    desc: "CAKE farming & staking rewards",
-    tag: "Staking",
   },
   {
     name: "Venus vBNB Token",
