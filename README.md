@@ -2,7 +2,7 @@
 
 **AI Security Agent for BNB Chain Smart Contracts**
 
-ClawForge is an autonomous AI security agent that registers its on-chain identity, analyzes Solidity smart contracts through 8 static detectors + Claude AI deep scanning, and mints verifiable audit report NFTs (ERC-721) on BNB Chain. The agent builds on-chain reputation with every audit — inspired by BNB Chain NFA (Non-Fungible Agent) standards for AI agent identity.
+ClawForge is an autonomous AI security agent that registers its on-chain identity, analyzes Solidity smart contracts through 10 static detectors + Claude AI deep scanning, and mints verifiable audit report NFTs (ERC-721) on BNB Chain. The agent builds on-chain reputation with every audit — inspired by BNB Chain NFA (Non-Fungible Agent) standards for AI agent identity.
 
 **Live Demo**: [web-lake-eight-59.vercel.app](https://web-lake-eight-59.vercel.app)
 
@@ -11,12 +11,12 @@ ClawForge is an autonomous AI security agent that registers its on-chain identit
 ## How It Works
 
 ```
-Register Agent → Upload .sol / Paste Address → Static Analysis (8 detectors) → AI Deep Scan (Claude) → Review Findings → Mint Audit NFT → Update Agent Reputation
+Register Agent → Upload .sol / Paste Address → Static Analysis (10 detectors) → AI Deep Scan (Claude) → Review Findings → Mint Audit NFT → Update Agent Reputation
 ```
 
 1. **Agent Registration** — The AI agent registers on-chain with its capabilities, version, and analysis modules (NFA-inspired identity)
 2. **Upload** a Solidity file (.sol) or **paste a contract address** (BSCScan URL or `0x...`) via the web dashboard or CLI
-3. **Static analysis** runs 8 vulnerability detectors (reentrancy, tx.origin, selfdestruct, delegatecall, unchecked calls, integer overflow, access control, uninitialized storage)
+3. **Static analysis** runs 10 vulnerability detectors (reentrancy, tx.origin, selfdestruct, delegatecall, unchecked calls, integer overflow, access control, uninitialized storage, storage collision, precision loss)
 4. **AI analysis** via Claude API performs deep logic review (flash loans, MEV, oracle manipulation, business logic)
 5. **Review** the consolidated report with safety score (0-100), severity breakdown, and remediation advice
 6. **Publish** the audit on-chain as an ERC-721 NFT on BNB Chain — immutable proof of security assessment
@@ -37,12 +37,12 @@ clawforge/
 │   │   ├── contracts/
 │   │   │   ├── ClawForgeRegistry.sol          # ERC-721 audit registry
 │   │   │   └── interfaces/IClawForgeRegistry.sol
-│   │   ├── test/        # 17 test cases
+│   │   ├── test/        # 27 test cases
 │   │   └── scripts/     # Deployment scripts
 │   │
 │   ├── cli/             # Node.js CLI (Commander.js)
 │   │   ├── src/
-│   │   │   ├── analyzers/static/detectors/    # 8 vulnerability detectors
+│   │   │   ├── analyzers/static/detectors/    # 10 vulnerability detectors
 │   │   │   ├── analyzers/ai/                  # Claude API integration
 │   │   │   ├── report/                        # JSON + HTML report generator
 │   │   │   ├── chain/                         # BSC on-chain publisher
@@ -75,6 +75,8 @@ clawforge/
 | CF-006 | Integer Overflow | Medium | Pre-0.8.0 contract without SafeMath |
 | CF-007 | Access Control | Medium | Public state-changing function without modifier |
 | CF-008 | Uninitialized Storage | Medium | Storage pointer declared without initialization |
+| CF-009 | Storage Collision | High | Upgradeable contract storage slot collision risk |
+| CF-010 | Precision Loss | Medium | Division before multiplication causes precision loss |
 
 ---
 
@@ -110,7 +112,7 @@ clawforge/
 ### Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/clawforge.git
+git clone https://github.com/obseasd/clawforge.git
 cd clawforge
 npm install
 ```
@@ -128,10 +130,10 @@ cp .env.example .env
 ### Run Tests
 
 ```bash
-# All tests (34 total)
+# All tests (44 total)
 npm test
 
-# Contract tests only (17 tests)
+# Contract tests only (27 tests)
 npm run test:contracts
 
 # CLI tests only (17 tests)
@@ -190,11 +192,11 @@ npm run dev:web
 ## Test Results
 
 ```
-Smart Contracts: 17/17 passing
+Smart Contracts: 27/27 passing
 CLI Detectors:   17/17 passing
 Web Build:       ✓ Compiled successfully
 ─────────────────────────────────
-Total:           34/34 tests passing
+Total:           44/44 tests passing
 ```
 
 ---
@@ -203,7 +205,7 @@ Total:           34/34 tests passing
 
 Built for **Good Vibes Only: OpenClaw Edition** on BNB Chain — Builders' Tools track.
 
-ClawForge is an **AI Security Agent** that addresses a critical gap in the BNB ecosystem: accessible, automated smart contract security auditing with on-chain agent identity and verifiable proof. The agent registers on-chain with its capabilities (inspired by BNB Chain NFA standards), performs audits through 8 static detectors + Claude AI, mints immutable NFT audit reports, and builds verifiable reputation with every interaction.
+ClawForge is an **AI Security Agent** that addresses a critical gap in the BNB ecosystem: accessible, automated smart contract security auditing with on-chain agent identity and verifiable proof. The agent registers on-chain with its capabilities (inspired by BNB Chain NFA standards), performs audits through 10 static detectors + Claude AI, mints immutable NFT audit reports, and builds verifiable reputation with every interaction.
 
 ### Key Differentiators
 
@@ -212,7 +214,7 @@ ClawForge is an **AI Security Agent** that addresses a critical gap in the BNB e
 - **Multi-Chain** — BSC Mainnet, BSC Testnet, and opBNB supported
 - **On-Chain NFTs** — ERC-721 proof-of-audit minted on BNB Chain
 - **Agent Reputation System** — Avg score, total audits tracked on-chain per agent
-- **34+ Tests** — Full test coverage across contracts (with agent identity) and CLI
+- **44+ Tests** — Full test coverage across contracts (with agent identity) and CLI
 - **5 Example Contracts** — Pre-loaded vulnerable contracts for instant demo
 
 ---
