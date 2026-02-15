@@ -1,8 +1,8 @@
 # ClawForge
 
-**AI-Powered Smart Contract Security Auditor for BNB Chain**
+**AI Security Agent for BNB Chain Smart Contracts**
 
-ClawForge combines static analysis with Claude AI to detect vulnerabilities in Solidity smart contracts and mint on-chain proof-of-audit NFTs (ERC-721) on BNB Chain. Audit by file upload or by pasting any verified contract address from BSC Mainnet, Testnet, or opBNB.
+ClawForge is an autonomous AI security agent that registers its on-chain identity, analyzes Solidity smart contracts through 8 static detectors + Claude AI deep scanning, and mints verifiable audit report NFTs (ERC-721) on BNB Chain. The agent builds on-chain reputation with every audit — inspired by BNB Chain NFA (Non-Fungible Agent) standards for AI agent identity.
 
 **Live Demo**: [web-lake-eight-59.vercel.app](https://web-lake-eight-59.vercel.app)
 
@@ -11,14 +11,16 @@ ClawForge combines static analysis with Claude AI to detect vulnerabilities in S
 ## How It Works
 
 ```
-Upload .sol / Paste Address  →  Static Analysis (8 detectors)  →  AI Deep Scan (Claude)  →  Review Findings  →  Mint Audit NFT
+Register Agent → Upload .sol / Paste Address → Static Analysis (8 detectors) → AI Deep Scan (Claude) → Review Findings → Mint Audit NFT → Update Agent Reputation
 ```
 
-1. **Upload** a Solidity file (.sol) or **paste a contract address** (BSCScan URL or `0x...`) via the web dashboard or CLI
-2. **Static analysis** runs 8 vulnerability detectors (reentrancy, tx.origin, selfdestruct, delegatecall, unchecked calls, integer overflow, access control, uninitialized storage)
-3. **AI analysis** via Claude API performs deep logic review (flash loans, MEV, oracle manipulation, business logic)
-4. **Review** the consolidated report with safety score (0-100), severity breakdown, and remediation advice
-5. **Publish** the audit on-chain as an ERC-721 NFT on BNB Chain — immutable proof of security assessment
+1. **Agent Registration** — The AI agent registers on-chain with its capabilities, version, and analysis modules (NFA-inspired identity)
+2. **Upload** a Solidity file (.sol) or **paste a contract address** (BSCScan URL or `0x...`) via the web dashboard or CLI
+3. **Static analysis** runs 8 vulnerability detectors (reentrancy, tx.origin, selfdestruct, delegatecall, unchecked calls, integer overflow, access control, uninitialized storage)
+4. **AI analysis** via Claude API performs deep logic review (flash loans, MEV, oracle manipulation, business logic)
+5. **Review** the consolidated report with safety score (0-100), severity breakdown, and remediation advice
+6. **Publish** the audit on-chain as an ERC-721 NFT on BNB Chain — immutable proof of security assessment
+7. **Reputation** — Agent's on-chain profile is automatically updated (total audits, average score)
 
 ![sc1](https://github.com/user-attachments/assets/fa05dcda-5834-4fe9-a89a-a08c839866ea)![scaudit](https://github.com/user-attachments/assets/86afdeb6-8ea3-45ec-acf1-4e12ef76c98d)
 
@@ -78,8 +80,16 @@ clawforge/
 
 ## Smart Contract
 
-**ClawForgeRegistry.sol** — ERC-721 NFT registry for on-chain audit proofs.
+**ClawForgeRegistry.sol** — AI Agent Registry + ERC-721 Audit NFTs (inspired by BNB Chain NFA standards).
 
+**AI Agent Identity:**
+- `registerAgent(name, version, capabilities)` — Register an AI agent with on-chain identity
+- `getAgentProfile(address)` — Query agent name, version, capabilities, total audits, avg score
+- `isRegisteredAgent(address)` — Check if address is a registered agent
+- `getRegisteredAgents()` — List all registered agents
+- Agent reputation auto-updates after each audit (total audits, weighted average score)
+
+**Audit Reports (ERC-721):**
 - Each audit is minted as a transferable NFT (CFAR — ClawForge Audit Report)
 - Stores: contract hash, severity counts, safety score, report hash, auditor address, timestamp, chain ID
 - Query functions: `getAudit()`, `getAuditsByContract()`, `getAuditsByAuditor()`, `getAuditCount()`
@@ -193,14 +203,16 @@ Total:           34/34 tests passing
 
 Built for **Good Vibes Only: OpenClaw Edition** on BNB Chain — Builders' Tools track.
 
-ClawForge addresses a critical gap in the BNB ecosystem: accessible, automated smart contract security auditing with on-chain proof. By combining static analysis with AI deep scanning and minting immutable NFT audit reports, we make security auditing transparent, verifiable, and permanent.
+ClawForge is an **AI Security Agent** that addresses a critical gap in the BNB ecosystem: accessible, automated smart contract security auditing with on-chain agent identity and verifiable proof. The agent registers on-chain with its capabilities (inspired by BNB Chain NFA standards), performs audits through 8 static detectors + Claude AI, mints immutable NFT audit reports, and builds verifiable reputation with every interaction.
 
 ### Key Differentiators
 
+- **AI Agent with On-Chain Identity** — The agent registers and builds reputation on-chain (NFA-inspired)
 - **Audit by Address** — Paste any verified BSCScan contract address (or URL) to instantly fetch and audit the source code
 - **Multi-Chain** — BSC Mainnet, BSC Testnet, and opBNB supported
 - **On-Chain NFTs** — ERC-721 proof-of-audit minted on BNB Chain
-- **34/34 Tests** — Full test coverage across contracts and CLI
+- **Agent Reputation System** — Avg score, total audits tracked on-chain per agent
+- **34+ Tests** — Full test coverage across contracts (with agent identity) and CLI
 - **5 Example Contracts** — Pre-loaded vulnerable contracts for instant demo
 
 ---

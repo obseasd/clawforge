@@ -6,12 +6,19 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IClawForgeRegistry.sol";
 
-/// @title ClawForge Audit Registry
-/// @notice On-chain registry of smart contract security audits as ERC-721 NFTs
-/// @dev Each audit report is minted as an NFT with metadata stored on-chain
+/// @title ClawForge AI Security Agent Registry
+/// @notice On-chain registry for AI security agents and their audit reports (ERC-721 NFTs)
+/// @dev Implements AI agent on-chain identity inspired by BNB Chain NFA standards.
+///      Each AI agent registers with capabilities and builds verifiable reputation
+///      through audits. Audit reports are minted as NFTs for immutable proof.
 contract ClawForgeRegistry is ERC721URIStorage, Ownable, IClawForgeRegistry {
     uint256 private _nextTokenId;
 
+    // Agent identity registry
+    mapping(address => AgentProfile) private _agents;
+    address[] private _registeredAgents;
+
+    // Audit data
     mapping(uint256 => AuditReport) private _audits;
     mapping(bytes32 => uint256[]) private _contractAudits;
     mapping(address => uint256[]) private _auditorAudits;
@@ -19,10 +26,69 @@ contract ClawForgeRegistry is ERC721URIStorage, Ownable, IClawForgeRegistry {
     uint256 public totalCriticalFindings;
     uint256 public totalHighFindings;
     uint256 public totalAudits;
+    uint256 public totalAgents;
 
     constructor() ERC721("ClawForge Audit Report", "CFAR") Ownable(msg.sender) {}
 
+    // ═══════════════════════════════════════════════════════════════
+    //  AI AGENT IDENTITY
+    // ═══════════════════════════════════════════════════════════════
+
+    /// @notice Register an AI agent with on-chain identity and capabilities
+    /// @param name Human-readable agent name (e.g. "ClawForge Security Agent")
+    /// @param version Agent version string (e.g. "1.0.0")
+    /// @param capabilities JSON-encoded capabilities (e.g. '["reentrancy","overflow","ai-logic"]')
+    function registerAgent(
+        string calldata name,
+        string calldata version,
+        string calldata capabilities
+    ) external {
+        require(bytes(name).length > 0, "Agent name required");
+        require(bytes(version).length > 0, "Agent version required");
+
+        bool isUpdate = _agents[msg.sender].registeredAt != 0;
+
+        _agents[msg.sender] = AgentProfile({
+            name: name,
+            version: version,
+            capabilities: capabilities,
+            totalAudits: _agents[msg.sender].totalAudits,
+            avgScore: _agents[msg.sender].avgScore,
+            registeredAt: isUpdate ? _agents[msg.sender].registeredAt : block.timestamp,
+            active: true
+        });
+
+        if (!isUpdate) {
+            _registeredAgents.push(msg.sender);
+            totalAgents++;
+            emit AgentRegistered(msg.sender, name, version);
+        } else {
+            emit AgentProfileUpdated(msg.sender, name, version);
+        }
+    }
+
+    /// @notice Get the on-chain profile of a registered AI agent
+    function getAgentProfile(address agent) external view returns (AgentProfile memory) {
+        require(_agents[agent].registeredAt != 0, "Agent not registered");
+        return _agents[agent];
+    }
+
+    /// @notice Check if an address is a registered agent
+    function isRegisteredAgent(address agent) external view returns (bool) {
+        return _agents[agent].registeredAt != 0;
+    }
+
+    /// @notice Get all registered agent addresses
+    function getRegisteredAgents() external view returns (address[] memory) {
+        return _registeredAgents;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  AUDIT REPORTS (ERC-721 NFTs)
+    // ═══════════════════════════════════════════════════════════════
+
     /// @notice Submit a new audit report and mint it as an NFT
+    /// @dev If the caller is a registered agent, their reputation is updated automatically
     function submitAudit(
         bytes32 contractHash,
         address auditedContract,
@@ -65,6 +131,14 @@ contract ClawForgeRegistry is ERC721URIStorage, Ownable, IClawForgeRegistry {
         totalCriticalFindings += criticalCount;
         totalHighFindings += highCount;
         totalAudits++;
+
+        // Update agent reputation if caller is a registered agent
+        if (_agents[msg.sender].registeredAt != 0) {
+            AgentProfile storage agent = _agents[msg.sender];
+            uint256 prevTotal = agent.totalAudits;
+            agent.avgScore = (agent.avgScore * prevTotal + overallScore) / (prevTotal + 1);
+            agent.totalAudits = prevTotal + 1;
+        }
 
         _mint(msg.sender, tokenId);
         if (bytes(reportURI).length > 0) {

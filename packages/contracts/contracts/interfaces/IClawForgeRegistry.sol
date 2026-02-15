@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+/// @title IClawForgeRegistry — AI Security Agent Registry Interface
+/// @notice Defines the interface for ClawForge's on-chain AI agent identity and audit system
+/// @dev Inspired by BNB Chain NFA (Non-Fungible Agent) standards for AI agent on-chain identity
 interface IClawForgeRegistry {
     enum Severity {
         Info,
@@ -8,6 +11,17 @@ interface IClawForgeRegistry {
         Medium,
         High,
         Critical
+    }
+
+    /// @notice On-chain identity for an AI security agent
+    struct AgentProfile {
+        string name;
+        string version;
+        string capabilities;    // JSON-encoded list of agent capabilities
+        uint256 totalAudits;
+        uint256 avgScore;       // weighted average score across all audits
+        uint256 registeredAt;
+        bool active;
     }
 
     struct AuditReport {
@@ -26,6 +40,9 @@ interface IClawForgeRegistry {
         uint256 chainId;
     }
 
+    event AgentRegistered(address indexed agent, string name, string version);
+    event AgentProfileUpdated(address indexed agent, string name, string version);
+
     event AuditSubmitted(
         uint256 indexed tokenId,
         bytes32 indexed contractHash,
@@ -36,6 +53,14 @@ interface IClawForgeRegistry {
     );
 
     event AuditURIUpdated(uint256 indexed tokenId, string newURI);
+
+    function registerAgent(
+        string calldata name,
+        string calldata version,
+        string calldata capabilities
+    ) external;
+
+    function getAgentProfile(address agent) external view returns (AgentProfile memory);
 
     function submitAudit(
         bytes32 contractHash,

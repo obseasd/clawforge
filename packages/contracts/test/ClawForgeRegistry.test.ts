@@ -207,4 +207,116 @@ describe("ClawForgeRegistry", () => {
       expect(await registry.ownerOf(1)).to.equal(auditor2.address);
     });
   });
+
+  describe("AI Agent Identity", () => {
+    const AGENT_NAME = "ClawForge Security Agent";
+    const AGENT_VERSION = "1.0.0";
+    const AGENT_CAPS = '["reentrancy","overflow","access-control","ai-logic-review"]';
+
+    it("should register a new AI agent", async () => {
+      await expect(
+        registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS)
+      ).to.emit(registry, "AgentRegistered")
+        .withArgs(auditor1.address, AGENT_NAME, AGENT_VERSION);
+
+      const profile = await registry.getAgentProfile(auditor1.address);
+      expect(profile.name).to.equal(AGENT_NAME);
+      expect(profile.version).to.equal(AGENT_VERSION);
+      expect(profile.capabilities).to.equal(AGENT_CAPS);
+      expect(profile.totalAudits).to.equal(0);
+      expect(profile.active).to.be.true;
+    });
+
+    it("should increment totalAgents on registration", async () => {
+      expect(await registry.totalAgents()).to.equal(0);
+      await registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS);
+      expect(await registry.totalAgents()).to.equal(1);
+      await registry.connect(auditor2).registerAgent("Agent 2", "0.1.0", "[]");
+      expect(await registry.totalAgents()).to.equal(2);
+    });
+
+    it("should update agent profile without incrementing totalAgents", async () => {
+      await registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS);
+      expect(await registry.totalAgents()).to.equal(1);
+
+      await expect(
+        registry.connect(auditor1).registerAgent(AGENT_NAME, "2.0.0", AGENT_CAPS)
+      ).to.emit(registry, "AgentProfileUpdated");
+
+      expect(await registry.totalAgents()).to.equal(1);
+      const profile = await registry.getAgentProfile(auditor1.address);
+      expect(profile.version).to.equal("2.0.0");
+    });
+
+    it("should revert if agent name is empty", async () => {
+      await expect(
+        registry.connect(auditor1).registerAgent("", AGENT_VERSION, AGENT_CAPS)
+      ).to.be.revertedWith("Agent name required");
+    });
+
+    it("should revert if agent version is empty", async () => {
+      await expect(
+        registry.connect(auditor1).registerAgent(AGENT_NAME, "", AGENT_CAPS)
+      ).to.be.revertedWith("Agent version required");
+    });
+
+    it("should return isRegisteredAgent correctly", async () => {
+      expect(await registry.isRegisteredAgent(auditor1.address)).to.be.false;
+      await registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS);
+      expect(await registry.isRegisteredAgent(auditor1.address)).to.be.true;
+      expect(await registry.isRegisteredAgent(auditor2.address)).to.be.false;
+    });
+
+    it("should return all registered agents", async () => {
+      await registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS);
+      await registry.connect(auditor2).registerAgent("Agent B", "1.0.0", "[]");
+
+      const agents = await registry.getRegisteredAgents();
+      expect(agents.length).to.equal(2);
+      expect(agents[0]).to.equal(auditor1.address);
+      expect(agents[1]).to.equal(auditor2.address);
+    });
+
+    it("should revert getAgentProfile for unregistered agent", async () => {
+      await expect(
+        registry.getAgentProfile(auditor1.address)
+      ).to.be.revertedWith("Agent not registered");
+    });
+
+    it("should auto-update agent reputation after audit", async () => {
+      await registry.connect(auditor1).registerAgent(AGENT_NAME, AGENT_VERSION, AGENT_CAPS);
+
+      // First audit: score 80
+      await registry.connect(auditor1).submitAudit(
+        SAMPLE_HASH, ethers.ZeroAddress,
+        1, 2, 0, 0, 0, 80, REPORT_HASH, "", 97
+      );
+
+      let profile = await registry.getAgentProfile(auditor1.address);
+      expect(profile.totalAudits).to.equal(1);
+      expect(profile.avgScore).to.equal(80);
+
+      // Second audit: score 60 -> avg = (80+60)/2 = 70
+      const hash2 = ethers.keccak256(ethers.toUtf8Bytes("contract2"));
+      const report2 = ethers.keccak256(ethers.toUtf8Bytes("report2"));
+      await registry.connect(auditor1).submitAudit(
+        hash2, ethers.ZeroAddress,
+        0, 0, 1, 0, 0, 60, report2, "", 97
+      );
+
+      profile = await registry.getAgentProfile(auditor1.address);
+      expect(profile.totalAudits).to.equal(2);
+      expect(profile.avgScore).to.equal(70);
+    });
+
+    it("should not update reputation for non-agent auditor", async () => {
+      // auditor2 is NOT registered as agent
+      await registry.connect(auditor2).submitAudit(
+        SAMPLE_HASH, ethers.ZeroAddress,
+        0, 0, 0, 0, 0, 90, REPORT_HASH, "", 97
+      );
+
+      expect(await registry.isRegisteredAgent(auditor2.address)).to.be.false;
+    });
+  });
 });
